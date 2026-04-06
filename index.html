@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ВСЁ ДЛЯ ФИПСИ от ВТ</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/statistics.js@latest/dist/statistics.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -23,7 +21,7 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -146,10 +144,6 @@
             align-items: center;
         }
 
-        .input-section h2 i {
-            margin-right: 10px;
-        }
-
         .controls-row {
             display: flex;
             justify-content: space-between;
@@ -158,12 +152,15 @@
             padding: 15px;
             background: #f8f9fa;
             border-radius: 10px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         .sample-controls {
             display: flex;
             align-items: center;
             gap: 15px;
+            flex-wrap: wrap;
         }
 
         .sample-controls label {
@@ -171,18 +168,13 @@
             color: #444;
         }
 
-        .sample-controls select {
+        .sample-controls select, .sample-controls input {
             padding: 8px 15px;
             border: 2px solid #ddd;
             border-radius: 5px;
             font-size: 1rem;
             background: white;
             cursor: pointer;
-        }
-
-        .sample-controls select:focus {
-            border-color: #1a2980;
-            outline: none;
         }
 
         .action-btn {
@@ -231,7 +223,6 @@
             border-radius: 8px;
             font-size: 1rem;
             resize: vertical;
-            transition: border-color 0.3s;
         }
 
         .data-input textarea:focus {
@@ -242,6 +233,12 @@
         .input-hint {
             font-size: 0.9rem;
             color: #777;
+            margin-top: 5px;
+        }
+
+        .data-stats {
+            font-size: 0.85rem;
+            color: #666;
             margin-top: 5px;
         }
 
@@ -258,16 +255,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto;
-        }
-
-        .calc-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 15px rgba(26, 41, 128, 0.3);
-        }
-
-        .calc-btn i {
-            margin-right: 10px;
+            margin: 20px auto;
         }
 
         .result-section {
@@ -302,6 +290,7 @@
             justify-content: space-between;
             padding: 12px 0;
             border-bottom: 1px solid #eee;
+            flex-wrap: wrap;
         }
 
         .result-row:last-child {
@@ -318,18 +307,65 @@
             color: #1a2980;
         }
 
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .stats-table th, .stats-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .stats-table th {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+        }
+
+        .stats-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: #f0f0f0;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
         .footer {
             text-align: center;
             padding: 25px;
             background: rgba(0, 0, 0, 0.8);
             color: #ddd;
             border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .footer p {
-            font-size: 1rem;
-            margin-bottom: 5px;
         }
 
         .footer .copyright {
@@ -354,39 +390,20 @@
             display: none;
         }
 
-        .method-info {
-            margin-top: 10px;
-            font-size: 0.9rem;
-            color: #777;
-        }
-
-        .data-stats {
-            font-size: 0.85rem;
-            color: #666;
-            margin-top: 5px;
-        }
-
         @media (max-width: 768px) {
             .methods-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+                grid-template-columns: 1fr;
             }
-            
-            .header h1 {
-                font-size: 2.2rem;
-            }
-            
-            .header p {
-                font-size: 1rem;
-            }
-            
             .controls-row {
                 flex-direction: column;
-                gap: 15px;
-                align-items: flex-start;
+                align-items: stretch;
             }
-            
-            .data-inputs-container {
-                grid-template-columns: 1fr;
+            .result-row {
+                flex-direction: column;
+                gap: 5px;
+            }
+            .stats-table {
+                font-size: 0.7rem;
             }
         }
     </style>
@@ -395,12 +412,10 @@
     <div class="container">
         <header class="header">
             <h1>ВСЁ ДЛЯ ФИПСИ от ВТ</h1>
-            <p>Статистический анализ данных с использованием популярных критериев и методов. Выберите нужный критерий, введите данные и получите результат.</p>
+            <p>Статистический анализ данных. Критерии, описательные статистики, таблица отклонений, Z-преобразование.</p>
         </header>
 
-        <div class="methods-grid" id="methodsContainer">
-            <!-- Методы будут добавлены через JavaScript -->
-        </div>
+        <div class="methods-grid" id="methodsContainer"></div>
 
         <div class="input-section" id="inputSection">
             <div class="selected-method">
@@ -414,36 +429,51 @@
             
             <div class="controls-row">
                 <div class="sample-controls">
-                    <label for="sampleCount">Количество выборок/групп:</label>
+                    <label>Количество выборок:</label>
                     <select id="sampleCount">
                         <option value="2">2</option>
                         <option value="3">3</option>
                         <option value="4">4</option>
                         <option value="5">5</option>
                     </select>
-                    <button class="action-btn" id="updateSamplesBtn">
-                        <i class="fas fa-sync-alt"></i> Обновить
-                    </button>
+                    <button class="action-btn" id="updateSamplesBtn"><i class="fas fa-sync-alt"></i> Обновить</button>
+                    <button class="action-btn" id="fillExampleBtn"><i class="fas fa-magic"></i> Пример</button>
                 </div>
-                <button class="action-btn" id="fillExampleBtn">
-                    <i class="fas fa-magic"></i> Заполнить примером
-                </button>
+                <div class="sample-controls">
+                    <label>Выборка для анализа:</label>
+                    <select id="analysisSampleSelect"></select>
+                    <button class="action-btn" id="refreshStatsBtn"><i class="fas fa-chart-line"></i> Показать статистику</button>
+                </div>
             </div>
             
-            <div class="data-inputs-container" id="dataInputs">
-                <!-- Поля ввода будут добавлены динамически -->
-            </div>
+            <div class="data-inputs-container" id="dataInputs"></div>
             
-            <button class="calc-btn" id="calculateBtn">
-                <i class="fas fa-calculator"></i> Рассчитать
-            </button>
+            <button class="calc-btn" id="calculateBtn"><i class="fas fa-calculator"></i> Рассчитать критерий</button>
         </div>
 
-        <div class="result-section" id="resultSection">
-            <h2><i class="fas fa-chart-bar"></i> Результаты расчета</h2>
-            <div class="result-content" id="resultContent">
-                <!-- Результаты будут добавлены через JavaScript -->
+        <!-- Дополнительная статистика -->
+        <div class="result-section" id="extraStatsSection">
+            <h2><i class="fas fa-chart-bar"></i> Описательные статистики выборки</h2>
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="desc">Основные статистики</button>
+                <button class="tab-btn" data-tab="deviations">Таблица отклонений</button>
+                <button class="tab-btn" data-tab="zscores">Z-оценки (нормальная шкала)</button>
             </div>
+            <div id="descTab" class="tab-content active">
+                <div class="result-content" id="descStatsContent"></div>
+            </div>
+            <div id="deviationsTab" class="tab-content">
+                <div class="result-content" id="deviationsTableContent"></div>
+            </div>
+            <div id="zscoresTab" class="tab-content">
+                <div class="result-content" id="zscoresContent"></div>
+            </div>
+        </div>
+
+        <!-- Результаты критерия -->
+        <div class="result-section" id="resultSection">
+            <h2><i class="fas fa-chart-bar"></i> Результаты критерия</h2>
+            <div class="result-content" id="resultContent"></div>
         </div>
 
         <footer class="footer">
@@ -453,1343 +483,551 @@
     </div>
 
     <script>
-        // Библиотека математических функций
+        // ======================== БИБЛИОТЕКА СТАТИСТИЧЕСКИХ ФУНКЦИЙ ========================
         const StatsMath = {
-            // Основные статистические функции
-            mean: (arr) => arr.reduce((a, b) => a + b, 0) / arr.length,
-            
-            variance: (arr) => {
+            mean: arr => arr.reduce((a,b) => a+b,0) / arr.length,
+            variance: arr => {
                 const m = StatsMath.mean(arr);
-                return arr.reduce((a, b) => a + Math.pow(b - m, 2), 0) / (arr.length - 1);
+                return arr.reduce((a,b) => a + Math.pow(b-m,2),0) / (arr.length-1);
             },
-            
-            std: (arr) => Math.sqrt(StatsMath.variance(arr)),
-            
-            // Квантили распределения Стьюдента (t-распределение)
-            tQuantile: (p, df) => {
-                // Аппроксимация квантилей t-распределения
-                if (p <= 0 || p >= 1 || df < 1) return NaN;
-                
-                // Для больших степеней свободы приближаем нормальным распределением
-                if (df >= 30) {
-                    const z = StatsMath.normQuantile(p);
-                    return z * (1 + 1/(4*df)) * (1 + z*z/(2*df));
-                }
-                
-                // Для малых степеней свободы используем приближение
-                const x = StatsMath.normQuantile(p);
-                const g1 = (x*x*x + x) / (4*df);
-                const g2 = (5*x*x*x*x + 16*x*x + 3) / (96*df*df);
-                const g3 = (3*x*x*x*x*x + 19*x*x*x + 17*x) / (384*df*df*df);
-                return x + g1 + g2 + g3;
+            std: arr => Math.sqrt(StatsMath.variance(arr)),
+            // Асимметрия (skewness)
+            skewness: arr => {
+                const n = arr.length;
+                const mean = StatsMath.mean(arr);
+                const m3 = arr.reduce((sum, x) => sum + Math.pow(x - mean, 3), 0) / n;
+                const std = StatsMath.std(arr);
+                return m3 / Math.pow(std, 3);
             },
-            
-            // Квантили нормального распределения (аппроксимация)
-            normQuantile: (p) => {
-                if (p <= 0 || p >= 1) return NaN;
-                
-                const a = [ -3.969683028665376e+01,  2.209460984245205e+02,
-                           -2.759285104469687e+02,  1.383577518672690e+02,
-                           -3.066479806614716e+01,  2.506628277459239e+00 ];
-                
-                const b = [ -5.447609879822406e+01,  1.615858368580409e+02,
-                           -1.556989798598866e+02,  6.680131188771972e+01,
-                           -1.328068155288572e+01 ];
-                
-                const c = [ -7.784894002430293e-03, -3.223964580411365e-01,
-                           -2.400758277161838e+00, -2.549732539343734e+00,
-                            4.374664141464968e+00,  2.938163982698783e+00 ];
-                
-                const d = [  7.784695709041462e-03,  3.224671290700398e-01,
-                            2.445134137142996e+00,  3.754408661907416e+00 ];
-                
-                let q, r;
-                
-                if (p < 0.02425) {
-                    q = Math.sqrt(-2 * Math.log(p));
-                    return (((((c[0]*q + c[1])*q + c[2])*q + c[3])*q + c[4])*q + c[5]) /
-                           ((((d[0]*q + d[1])*q + d[2])*q + d[3])*q + 1);
-                } else if (p <= 0.97575) {
-                    q = p - 0.5;
-                    r = q*q;
-                    return (((((a[0]*r + a[1])*r + a[2])*r + a[3])*r + a[4])*r + a[5])*q /
-                           (((((b[0]*r + b[1])*r + b[2])*r + b[3])*r + b[4])*r + 1);
-                } else {
-                    q = Math.sqrt(-2 * Math.log(1 - p));
-                    return -(((((c[0]*q + c[1])*q + c[2])*q + c[3])*q + c[4])*q + c[5]) /
-                           ((((d[0]*q + d[1])*q + d[2])*q + d[3])*q + 1);
-                }
+            // Эксцесс (kurtosis) - избыточный эксцесс (относительно нормального)
+            kurtosis: arr => {
+                const n = arr.length;
+                const mean = StatsMath.mean(arr);
+                const m4 = arr.reduce((sum, x) => sum + Math.pow(x - mean, 4), 0) / n;
+                const std = StatsMath.std(arr);
+                return m4 / Math.pow(std, 4) - 3;
             },
-            
-            // Функция распределения Стьюдента (CDF)
+            // Квантили
+            quantile: (arr, p) => {
+                if (arr.length === 0) return 0;
+                const sorted = [...arr].sort((a,b)=>a-b);
+                const index = (p/100)*(sorted.length-1);
+                const lower = Math.floor(index);
+                const upper = lower+1;
+                const weight = index - lower;
+                if (upper >= sorted.length) return sorted[lower];
+                return sorted[lower]*(1-weight) + sorted[upper]*weight;
+            },
+            // Функции распределения (упрощенные для p-value)
             tCDF: (t, df) => {
-                if (df <= 0) return NaN;
-                
+                // аппроксимация
                 const x = df / (df + t*t);
                 const ib = StatsMath.incompleteBeta(x, df/2, 0.5);
-                
-                if (t < 0) {
-                    return 0.5 * ib;
-                } else {
-                    return 1 - 0.5 * ib;
-                }
+                if (t < 0) return 0.5 * ib;
+                else return 1 - 0.5 * ib;
             },
-            
-            // Неполная бета-функция
-            incompleteBeta: (x, a, b) => {
-                if (x <= 0) return 0;
-                if (x >= 1) return 1;
-                
-                const bt = Math.exp(StatsMath.logBeta(a, b) + a*Math.log(x) + b*Math.log(1-x));
-                
-                if (x < (a+1)/(a+b+2)) {
-                    return bt * StatsMath.betaCF(x, a, b) / a;
-                } else {
-                    return 1 - bt * StatsMath.betaCF(1-x, b, a) / b;
-                }
-            },
-            
-            // Логарифм бета-функции
-            logBeta: (a, b) => {
-                return StatsMath.logGamma(a) + StatsMath.logGamma(b) - StatsMath.logGamma(a+b);
-            },
-            
-            // Логарифм гамма-функции
-            logGamma: (z) => {
-                const cof = [76.18009172947146, -86.50532032941677,
-                            24.01409824083091, -1.231739572450155,
-                            0.1208650973866179e-2, -0.5395239384953e-5];
-                
-                let x = z;
-                let y = z;
-                let tmp = x + 5.5;
-                tmp -= (x + 0.5) * Math.log(tmp);
-                let ser = 1.000000000190015;
-                
-                for (let j = 0; j < 6; j++) {
-                    y += 1;
-                    ser += cof[j] / y;
-                }
-                
-                return -tmp + Math.log(2.5066282746310005 * ser / x);
-            },
-            
-            // Продолженная дробь для бета-функции
-            betaCF: (x, a, b) => {
-                const fpmin = 1e-30;
-                const qab = a + b;
-                const qap = a + 1;
-                const qam = a - 1;
-                let c = 1;
-                let d = 1 - qab * x / qap;
-                
-                if (Math.abs(d) < fpmin) d = fpmin;
-                d = 1 / d;
-                let h = d;
-                
-                for (let m = 1; m <= 100; m++) {
-                    const m2 = 2 * m;
-                    let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
-                    d = 1 + aa * d;
-                    
-                    if (Math.abs(d) < fpmin) d = fpmin;
-                    
-                    c = 1 + aa / c;
-                    if (Math.abs(c) < fpmin) c = fpmin;
-                    
-                    d = 1 / d;
-                    h *= d * c;
-                    
-                    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
-                    d = 1 + aa * d;
-                    
-                    if (Math.abs(d) < fpmin) d = fpmin;
-                    
-                    c = 1 + aa / c;
-                    if (Math.abs(c) < fpmin) c = fpmin;
-                    
-                    d = 1 / d;
-                    const del = d * c;
-                    h *= del;
-                    
-                    if (Math.abs(del - 1) < 3e-7) break;
-                }
-                
-                return h;
-            },
-            
-            // Функция распределения Фишера (F-распределение)
             fCDF: (f, df1, df2) => {
                 const x = df2 / (df2 + df1 * f);
                 return StatsMath.incompleteBeta(x, df2/2, df1/2);
             },
-            
-            // Функция хи-квадрат распределения
             chi2CDF: (x, df) => {
                 if (x <= 0) return 0;
                 return StatsMath.incompleteGamma(df/2, x/2, StatsMath.logGamma(df/2));
             },
-            
-            // Неполная гамма-функция
-            incompleteGamma: (a, x, logGammaA) => {
+            incompleteBeta: (x, a, b) => {
                 if (x <= 0) return 0;
-                
+                if (x >= 1) return 1;
+                const bt = Math.exp(StatsMath.logBeta(a,b) + a*Math.log(x) + b*Math.log(1-x));
+                if (x < (a+1)/(a+b+2)) return bt * StatsMath.betaCF(x,a,b)/a;
+                else return 1 - bt * StatsMath.betaCF(1-x,b,a)/b;
+            },
+            logBeta: (a,b) => StatsMath.logGamma(a) + StatsMath.logGamma(b) - StatsMath.logGamma(a+b),
+            logGamma: (z) => {
+                const cof = [76.18009172947146, -86.50532032941677, 24.01409824083091, -1.231739572450155, 0.1208650973866179e-2, -0.5395239384953e-5];
+                let x = z, y = z, tmp = x+5.5;
+                tmp -= (x+0.5)*Math.log(tmp);
+                let ser = 1.000000000190015;
+                for(let j=0;j<6;j++) ser += cof[j]/++y;
+                return -tmp + Math.log(2.5066282746310005*ser/x);
+            },
+            betaCF: (x,a,b) => {
+                const fpmin=1e-30;
+                let qab=a+b, qap=a+1, qam=a-1, c=1, d=1-qab*x/qap;
+                if(Math.abs(d)<fpmin) d=fpmin;
+                d=1/d;
+                let h=d;
+                for(let m=1;m<=100;m++){
+                    let m2=2*m, aa=m*(b-m)*x/((qam+m2)*(a+m2));
+                    d=1+aa*d; if(Math.abs(d)<fpmin) d=fpmin;
+                    c=1+aa/c; if(Math.abs(c)<fpmin) c=fpmin;
+                    d=1/d; h*=d*c;
+                    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2));
+                    d=1+aa*d; if(Math.abs(d)<fpmin) d=fpmin;
+                    c=1+aa/c; if(Math.abs(c)<fpmin) c=fpmin;
+                    d=1/d; let del=d*c; h*=del;
+                    if(Math.abs(del-1)<3e-7) break;
+                }
+                return h;
+            },
+            incompleteGamma: (a, x, logGammaA) => {
+                if(x<=0) return 0;
                 const gln = logGammaA || StatsMath.logGamma(a);
-                
-                if (x < a + 1) {
-                    // Ряд
-                    let ap = a;
-                    let del = 1 / a;
-                    let sum = del;
-                    
-                    for (let n = 1; n <= 100; n++) {
-                        ap += 1;
-                        del *= x / ap;
-                        sum += del;
-                        if (Math.abs(del) < Math.abs(sum) * 3e-7) break;
+                if(x < a+1){
+                    let ap=a, del=1/a, sum=del;
+                    for(let n=1;n<=100;n++){
+                        ap+=1; del*=x/ap; sum+=del;
+                        if(Math.abs(del)<Math.abs(sum)*3e-7) break;
                     }
-                    
-                    return sum * Math.exp(-x + a * Math.log(x) - gln);
+                    return sum*Math.exp(-x + a*Math.log(x) - gln);
                 } else {
-                    // Продолженная дробь
-                    let b = x + 1 - a;
-                    let c = 1 / 1e-30;
-                    let d = 1 / b;
-                    let h = d;
-                    
-                    for (let i = 1; i <= 100; i++) {
-                        const an = -i * (i - a);
-                        b += 2;
-                        d = an * d + b;
-                        if (Math.abs(d) < 1e-30) d = 1e-30;
-                        c = b + an / c;
-                        if (Math.abs(c) < 1e-30) c = 1e-30;
-                        d = 1 / d;
-                        const del = d * c;
-                        h *= del;
-                        if (Math.abs(del - 1) < 3e-7) break;
+                    let b=x+1-a, c=1/1e-30, d=1/b, h=d;
+                    for(let i=1;i<=100;i++){
+                        let an=-i*(i-a);
+                        b+=2; d=an*d+b; if(Math.abs(d)<1e-30) d=1e-30;
+                        c=b+an/c; if(Math.abs(c)<1e-30) c=1e-30;
+                        d=1/d; let del=d*c; h*=del;
+                        if(Math.abs(del-1)<3e-7) break;
                     }
-                    
-                    return 1 - Math.exp(-x + a * Math.log(x) - gln) * h;
+                    return 1 - Math.exp(-x + a*Math.log(x) - gln)*h;
                 }
             }
         };
 
-        // Данные о статистических методах
+        // ======================== ДАННЫЕ МЕТОДОВ ========================
         const statisticalMethods = [
-            {
-                id: 'fisher',
-                name: 'Критерий Фишера',
-                description: 'Используется для сравнения дисперсий двух выборок.',
-                icon: 'fas fa-balance-scale',
-                minSamples: 2,
-                maxSamples: 2
-            },
-            {
-                id: 'student',
-                name: 'Критерий Стьюдента',
-                description: 'Используется для проверки гипотез о равенстве средних значений.',
-                icon: 'fas fa-chart-line',
-                minSamples: 2,
-                maxSamples: 2
-            },
-            {
-                id: 'siegel-tukey',
-                name: 'Критерий Сиджела-Тьюки',
-                description: 'Непараметрический критерий для сравнения дисперсий двух выборок.',
-                icon: 'fas fa-exchange-alt',
-                minSamples: 2,
-                maxSamples: 2
-            },
-            {
-                id: 'mann-whitney',
-                name: 'Критерий Манна-Уитни',
-                description: 'Непараметрический аналог t-критерия для независимых выборок.',
-                icon: 'fas fa-sort-amount-up',
-                minSamples: 2,
-                maxSamples: 2
-            },
-            {
-                id: 'spearman',
-                name: 'Критерий Спирмена',
-                description: 'Измеряет степень монотонной связи между двумя переменными.',
-                icon: 'fas fa-link',
-                minSamples: 2,
-                maxSamples: 2
-            },
-            {
-                id: 'hortley',
-                name: 'Критерий Хортлея',
-                description: 'Используется для обнаружения выбросов в данных.',
-                icon: 'fas fa-filter',
-                minSamples: 1,
-                maxSamples: 1
-            },
-            {
-                id: 'cochran',
-                name: 'Критерий Кочрена',
-                description: 'Используется для сравнения нескольких дисперсий.',
-                icon: 'fas fa-th-large',
-                minSamples: 3,
-                maxSamples: 10
-            },
-            {
-                id: 'bartlett',
-                name: 'Критерий Бартлета',
-                description: 'Проверка равенства дисперсий нескольких выборок.',
-                icon: 'fas fa-equals',
-                minSamples: 2,
-                maxSamples: 10
-            },
-            {
-                id: 'anova',
-                name: 'Однофакторный дисперсионный анализ',
-                description: 'Сравнение средних значений трех и более групп.',
-                icon: 'fas fa-chart-pie',
-                minSamples: 3,
-                maxSamples: 10
-            },
-            {
-                id: 'pearson',
-                name: 'Корреляция Пирсона',
-                description: 'Измерение линейной связи между двумя переменными.',
-                icon: 'fas fa-chart-area',
-                minSamples: 2,
-                maxSamples: 2
-            },
-            {
-                id: 'smirnov',
-                name: 'Критерий Смирнова',
-                description: 'Сравнение эмпирических распределений двух выборок.',
-                icon: 'fas fa-random',
-                minSamples: 2,
-                maxSamples: 2
-            }
+            { id:'fisher', name:'Критерий Фишера', description:'Сравнение дисперсий двух выборок.', icon:'fas fa-balance-scale', minSamples:2, maxSamples:2 },
+            { id:'student', name:'Критерий Стьюдента', description:'Равенство средних двух выборок.', icon:'fas fa-chart-line', minSamples:2, maxSamples:2 },
+            { id:'siegel-tukey', name:'Критерий Сиджела-Тьюки', description:'Непараметрическое сравнение дисперсий.', icon:'fas fa-exchange-alt', minSamples:2, maxSamples:2 },
+            { id:'mann-whitney', name:'Критерий Манна-Уитни', description:'Сравнение двух независимых выборок.', icon:'fas fa-sort-amount-up', minSamples:2, maxSamples:2 },
+            { id:'spearman', name:'Критерий Спирмена', description:'Ранговая корреляция.', icon:'fas fa-link', minSamples:2, maxSamples:2 },
+            { id:'hortley', name:'Критерий Хортлея', description:'Обнаружение выбросов.', icon:'fas fa-filter', minSamples:1, maxSamples:1 },
+            { id:'cochran', name:'Критерий Кочрена', description:'Сравнение дисперсий равных групп.', icon:'fas fa-th-large', minSamples:3, maxSamples:10 },
+            { id:'bartlett', name:'Критерий Бартлета', description:'Равенство дисперсий нескольких выборок.', icon:'fas fa-equals', minSamples:2, maxSamples:10 },
+            { id:'anova', name:'Однофакторный ANOVA', description:'Сравнение средних 3+ групп.', icon:'fas fa-chart-pie', minSamples:3, maxSamples:10 },
+            { id:'pearson', name:'Корреляция Пирсона', description:'Линейная связь.', icon:'fas fa-chart-area', minSamples:2, maxSamples:2 },
+            { id:'smirnov', name:'Критерий Смирнова', description:'Сравнение распределений.', icon:'fas fa-random', minSamples:2, maxSamples:2 }
         ];
 
-        // Текущий выбранный метод
         let selectedMethod = null;
-        // Количество выборок
         let sampleCount = 2;
+        let currentInputs = []; // храним актуальные выборки для отображения статистик
 
-        // Инициализация при загрузке страницы
-        document.addEventListener('DOMContentLoaded', function() {
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
             renderMethods();
             setupEventListeners();
-            // Выбираем первый метод по умолчанию
             selectMethod('fisher');
         });
 
-        // Рендерим карточки методов
         function renderMethods() {
             const container = document.getElementById('methodsContainer');
-            
-            statisticalMethods.forEach(method => {
+            statisticalMethods.forEach(m => {
                 const card = document.createElement('div');
                 card.className = 'method-card';
-                card.dataset.methodId = method.id;
-                
+                card.dataset.methodId = m.id;
                 card.innerHTML = `
-                    <div class="method-icon">
-                        <i class="${method.icon}"></i>
-                    </div>
-                    <h3>${method.name}</h3>
-                    <p>${method.description}</p>
-                    <div class="method-info">
-                        <i class="fas fa-layer-group"></i> Выборок: ${method.minSamples}-${method.maxSamples}
-                    </div>
+                    <div class="method-icon"><i class="${m.icon}"></i></div>
+                    <h3>${m.name}</h3>
+                    <p>${m.description}</p>
+                    <div class="method-info">Выборок: ${m.minSamples}-${m.maxSamples}</div>
                 `;
-                
                 container.appendChild(card);
             });
         }
 
-        // Настройка обработчиков событий
         function setupEventListeners() {
-            // Обработка кликов по карточкам методов
             document.querySelectorAll('.method-card').forEach(card => {
-                card.addEventListener('click', function() {
-                    const methodId = this.dataset.methodId;
-                    selectMethod(methodId);
-                });
+                card.addEventListener('click', () => selectMethod(card.dataset.methodId));
             });
-            
-            // Обработка клика по кнопке обновления выборок
             document.getElementById('updateSamplesBtn').addEventListener('click', updateSampleCount);
-            
-            // Обработка изменения количества выборок
-            document.getElementById('sampleCount').addEventListener('change', function() {
-                sampleCount = parseInt(this.value);
+            document.getElementById('sampleCount').addEventListener('change', (e) => {
+                sampleCount = parseInt(e.target.value);
                 updateSampleInputs();
             });
-            
-            // Обработка клика по кнопке заполнения примера
             document.getElementById('fillExampleBtn').addEventListener('click', fillExampleData);
-            
-            // Обработка клика по кнопке расчета
             document.getElementById('calculateBtn').addEventListener('click', calculate);
+            document.getElementById('refreshStatsBtn').addEventListener('click', () => updateExtraStats());
+            // Переключение вкладок
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tab = btn.dataset.tab;
+                    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    if(tab === 'desc') document.getElementById('descTab').classList.add('active');
+                    else if(tab === 'deviations') document.getElementById('deviationsTab').classList.add('active');
+                    else if(tab === 'zscores') document.getElementById('zscoresTab').classList.add('active');
+                });
+            });
         }
 
-        // Выбор метода
         function selectMethod(methodId) {
-            // Снимаем выделение со всех карточек
-            document.querySelectorAll('.method-card').forEach(card => {
-                card.classList.remove('active');
-            });
-            
-            // Выделяем выбранную карточку
+            document.querySelectorAll('.method-card').forEach(c => c.classList.remove('active'));
             document.querySelector(`.method-card[data-method-id="${methodId}"]`).classList.add('active');
-            
-            // Находим выбранный метод
-            selectedMethod = statisticalMethods.find(method => method.id === methodId);
-            
-            // Обновляем информацию о выбранном методе
+            selectedMethod = statisticalMethods.find(m => m.id === methodId);
             document.getElementById('selectedMethodTitle').innerHTML = `<i class="${selectedMethod.icon}"></i> ${selectedMethod.name}`;
             document.getElementById('selectedMethodDescription').textContent = selectedMethod.description;
-            
-            // Устанавливаем количество выборок по умолчанию
             const defaultSamples = Math.max(selectedMethod.minSamples, 2);
             sampleCount = defaultSamples;
             document.getElementById('sampleCount').value = defaultSamples;
-            
-            // Генерируем поля ввода
             updateSampleInputs();
-            
-            // Показываем секцию ввода
             document.getElementById('inputSection').classList.add('active');
-            
-            // Скрываем секцию результатов
             document.getElementById('resultSection').classList.remove('active');
-            
-            // Скрываем ошибку
+            document.getElementById('extraStatsSection').classList.remove('active');
             hideError();
-            
-            // Прокручиваем к секции ввода
-            document.getElementById('inputSection').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Обновление количества выборок
-        function updateSampleCount() {
-            updateSampleInputs();
-        }
+        function updateSampleCount() { updateSampleInputs(); }
 
-        // Обновление полей ввода для выборок
         function updateSampleInputs() {
             const container = document.getElementById('dataInputs');
             container.innerHTML = '';
-            
-            // Ограничиваем количество выборок в соответствии с методом
-            const actualSamples = Math.min(Math.max(sampleCount, selectedMethod.minSamples), selectedMethod.maxSamples);
-            
-            for (let i = 0; i < actualSamples; i++) {
-                const inputGroup = document.createElement('div');
-                inputGroup.className = 'data-input';
-                
+            const actual = Math.min(Math.max(sampleCount, selectedMethod.minSamples), selectedMethod.maxSamples);
+            for(let i=0;i<actual;i++){
+                const div = document.createElement('div');
+                div.className = 'data-input';
                 let label = `Выборка ${i+1}`;
-                if (selectedMethod.id === 'spearman' || selectedMethod.id === 'pearson') {
-                    label = i === 0 ? 'Переменная X' : 'Переменная Y';
-                } else if (selectedMethod.id === 'anova') {
-                    label = `Группа ${i+1}`;
-                } else if (selectedMethod.id === 'hortley') {
-                    label = 'Данные';
-                }
-                
-                inputGroup.innerHTML = `
+                if(selectedMethod.id === 'spearman' || selectedMethod.id === 'pearson') label = i===0 ? 'Переменная X' : 'Переменная Y';
+                if(selectedMethod.id === 'anova') label = `Группа ${i+1}`;
+                if(selectedMethod.id === 'hortley') label = 'Данные';
+                div.innerHTML = `
                     <label>${label} (через запятую)</label>
-                    <textarea id="input-${i}" placeholder="Например: ${getExampleData(i, actualSamples)}"></textarea>
-                    <div class="input-hint">Введите числовые значения через запятую</div>
+                    <textarea id="input-${i}" placeholder="Например: ${getExampleData(i,actual)}"></textarea>
+                    <div class="input-hint">Числа через запятую</div>
                     <div class="data-stats" id="stats-${i}"></div>
                 `;
-                
-                container.appendChild(inputGroup);
+                container.appendChild(div);
+                const ta = document.getElementById(`input-${i}`);
+                ta.addEventListener('input', () => updateStatsDisplay(i));
             }
-            
-            // Обновляем количество выборок в интерфейсе
-            document.getElementById('sampleCount').value = actualSamples;
-            sampleCount = actualSamples;
+            document.getElementById('sampleCount').value = actual;
+            sampleCount = actual;
+            // Обновить выпадающий список выбора выборки для анализа
+            const select = document.getElementById('analysisSampleSelect');
+            select.innerHTML = '';
+            for(let i=0;i<actual;i++){
+                let opt = document.createElement('option');
+                opt.value = i;
+                opt.textContent = `Выборка ${i+1}`;
+                select.appendChild(opt);
+            }
         }
 
-        // Генерация примерных данных
-        function getExampleData(sampleIndex, totalSamples) {
+        function getExampleData(idx, total){
             const examples = {
-                'fisher': ['2.1, 3.4, 4.5, 5.2, 6.7', '1.8, 2.9, 3.7, 4.1, 5.5'],
-                'student': ['12, 15, 18, 20, 22', '10, 14, 16, 19, 21'],
-                'siegel-tukey': ['5, 7, 8, 10, 12', '6, 9, 11, 13, 15'],
-                'mann-whitney': ['3, 5, 6, 8, 9', '2, 4, 7, 10, 11'],
-                'spearman': ['1, 2, 3, 4, 5', '2, 4, 5, 4, 6'],
-                'pearson': ['1, 2, 3, 4, 5', '2, 4, 6, 8, 10'],
-                'hortley': ['12, 14, 15, 16, 100'],
-                'smirnov': ['1.2, 2.3, 3.4, 4.5', '1.5, 2.4, 3.3, 4.2']
+                fisher: ['2.1,3.4,4.5,5.2,6.7','1.8,2.9,3.7,4.1,5.5'],
+                student: ['12,15,18,20,22','10,14,16,19,21'],
+                siegel-tukey: ['5,7,8,10,12','6,9,11,13,15'],
+                mann-whitney: ['3,5,6,8,9','2,4,7,10,11'],
+                spearman: ['1,2,3,4,5','2,4,5,4,6'],
+                pearson: ['1,2,3,4,5','2,4,6,8,10'],
+                hortley: ['12,14,15,16,100'],
+                smirnov: ['1.2,2.3,3.4,4.5','1.5,2.4,3.3,4.2']
             };
-            
-            if (examples[selectedMethod.id]) {
-                return examples[selectedMethod.id][sampleIndex] || '5, 6, 7, 8, 9';
-            }
-            
-            // Для методов с несколькими выборками
-            const base = 10 + sampleIndex * 2;
-            return `${base}, ${base+1}, ${base+2}, ${base+3}, ${base+4}`;
+            if(examples[selectedMethod.id]) return examples[selectedMethod.id][idx] || '5,6,7,8,9';
+            const base = 10 + idx*2;
+            return `${base},${base+1},${base+2},${base+3},${base+4}`;
         }
 
-        // Заполнение примерами
-        function fillExampleData() {
-            for (let i = 0; i < sampleCount; i++) {
-                const textarea = document.getElementById(`input-${i}`);
-                if (textarea) {
-                    textarea.value = getExampleData(i, sampleCount);
-                    updateStatsDisplay(i);
-                }
+        function fillExampleData(){
+            for(let i=0;i<sampleCount;i++){
+                const ta = document.getElementById(`input-${i}`);
+                if(ta) ta.value = getExampleData(i, sampleCount);
+                updateStatsDisplay(i);
             }
         }
 
-        // Показываем ошибку
-        function showError(message) {
-            document.getElementById('errorText').textContent = message;
-            document.getElementById('errorMessage').style.display = 'block';
-        }
-
-        // Скрываем ошибку
-        function hideError() {
-            document.getElementById('errorMessage').style.display = 'none';
-        }
-
-        // Преобразуем строку в массив чисел
-        function parseInput(inputString) {
-            if (!inputString.trim()) return null;
-            
-            const numbers = inputString.split(',')
-                .map(num => num.trim())
-                .filter(num => num !== '')
-                .map(num => parseFloat(num));
-            
-            // Проверяем, все ли значения - числа
-            if (numbers.some(isNaN)) {
-                return null;
-            }
-            
-            return numbers;
-        }
-
-        // Обновление статистики для выборки
-        function updateStatsDisplay(index) {
-            const textarea = document.getElementById(`input-${index}`);
-            const statsDiv = document.getElementById(`stats-${index}`);
-            
-            if (!textarea || !statsDiv) return;
-            
-            const data = parseInput(textarea.value);
-            if (!data || data.length < 2) {
+        function updateStatsDisplay(idx){
+            const ta = document.getElementById(`input-${idx}`);
+            const statsDiv = document.getElementById(`stats-${idx}`);
+            if(!ta || !statsDiv) return;
+            const data = parseInput(ta.value);
+            if(!data || data.length<2){
                 statsDiv.innerHTML = '';
                 return;
             }
-            
             const mean = StatsMath.mean(data).toFixed(2);
             const std = StatsMath.std(data).toFixed(2);
-            const n = data.length;
-            
-            statsDiv.innerHTML = `n=${n}, среднее=${mean}, ст.откл.=${std}`;
+            statsDiv.innerHTML = `n=${data.length}, x̄=${mean}, σ=${std}`;
         }
 
-        // Основная функция расчета
-        function calculate() {
-            // Скрываем предыдущие результаты и ошибки
-            document.getElementById('resultSection').classList.remove('active');
-            hideError();
-            
-            // Проверяем, выбран ли метод
-            if (!selectedMethod) {
-                showError('Сначала выберите статистический метод');
+        function parseInput(str){
+            if(!str.trim()) return null;
+            const nums = str.split(',').map(s=>parseFloat(s.trim())).filter(v=>!isNaN(v));
+            return nums.length ? nums : null;
+        }
+
+        function hideError(){ document.getElementById('errorMessage').style.display='none'; }
+        function showError(msg){ document.getElementById('errorText').innerHTML=msg; document.getElementById('errorMessage').style.display='block'; }
+
+        function collectInputs(){
+            let inputs=[];
+            for(let i=0;i<sampleCount;i++){
+                const ta = document.getElementById(`input-${i}`);
+                const data = parseInput(ta.value);
+                if(!data || data.length<2){
+                    showError(`Выборка ${i+1} должна содержать минимум 2 числа.`);
+                    return null;
+                }
+                inputs.push(data);
+            }
+            return inputs;
+        }
+
+        // Обновление дополнительных статистик для выбранной выборки
+        function updateExtraStats(){
+            const inputs = collectInputs();
+            if(!inputs) return;
+            currentInputs = inputs;
+            const selectedIdx = parseInt(document.getElementById('analysisSampleSelect').value);
+            const sample = inputs[selectedIdx];
+            if(!sample || sample.length<2){
+                showError('Недостаточно данных для статистик');
                 return;
             }
-            
-            // Собираем данные
-            const inputs = [];
-            let hasError = false;
-            
-            for (let i = 0; i < sampleCount; i++) {
-                const inputElement = document.getElementById(`input-${i}`);
-                const inputValue = inputElement ? inputElement.value : '';
-                const parsedData = parseInput(inputValue);
-                
-                if (parsedData === null) {
-                    showError(`Ошибка в данных выборки ${i+1}. Убедитесь, что введены только числа, разделенные запятыми.`);
-                    hasError = true;
-                    break;
-                }
-                
-                // Проверяем, достаточно ли данных
-                if (parsedData.length < 2) {
-                    showError(`Выборка ${i+1} должна содержать минимум 2 значения.`);
-                    hasError = true;
-                    break;
-                }
-                
-                inputs.push(parsedData);
+            const mean = StatsMath.mean(sample);
+            const variance = StatsMath.variance(sample);
+            const std = StatsMath.std(sample);
+            const skew = StatsMath.skewness(sample);
+            const kurt = StatsMath.kurtosis(sample);
+            const min = Math.min(...sample);
+            const max = Math.max(...sample);
+            const q1 = StatsMath.quantile(sample,25);
+            const median = StatsMath.quantile(sample,50);
+            const q3 = StatsMath.quantile(sample,75);
+            // Основные статистики
+            document.getElementById('descStatsContent').innerHTML = `
+                <div class="result-row"><div class="result-label">Объем выборки (n):</div><div class="result-value">${sample.length}</div></div>
+                <div class="result-row"><div class="result-label">Среднее арифметическое:</div><div class="result-value">${mean.toFixed(4)}</div></div>
+                <div class="result-row"><div class="result-label">Дисперсия (несмещенная):</div><div class="result-value">${variance.toFixed(4)}</div></div>
+                <div class="result-row"><div class="result-label">Среднеквадратичное отклонение (σ):</div><div class="result-value">${std.toFixed(4)}</div></div>
+                <div class="result-row"><div class="result-label">Асимметрия (Skewness):</div><div class="result-value">${skew.toFixed(4)}</div></div>
+                <div class="result-row"><div class="result-label">Эксцесс (Kurtosis, избыточный):</div><div class="result-value">${kurt.toFixed(4)}</div></div>
+                <div class="result-row"><div class="result-label">Минимум:</div><div class="result-value">${min.toFixed(4)}</div></div>
+                <div class="result-row"><div class="result-label">1-й квартиль (Q1):</div><div class="result-value">${q1.toFixed(4)}</div></div>
+                <div class="result-row"><div class="result-label">Медиана (Q2):</div><div class="result-value">${median.toFixed(4)}</div></div>
+                <div class="result-row"><div class="result-label">3-й квартиль (Q3):</div><div class="result-value">${q3.toFixed(4)}</div></div>
+                <div class="result-row"><div class="result-label">Максимум:</div><div class="result-value">${max.toFixed(4)}</div></div>
+            `;
+            // Таблица отклонений
+            const deviations = sample.map(x => ({ value: x, deviation: x - mean, sqDeviation: Math.pow(x-mean,2) }));
+            let devTable = `<table class="stats-table"><thead><tr><th>№</th><th>Значение</th><th>Отклонение (x - x̄)</th><th>Квадрат отклонения</th></tr></thead><tbody>`;
+            deviations.forEach((d,i) => {
+                devTable += `<tr><td>${i+1}</td><td>${d.value.toFixed(4)}</td><td>${d.deviation.toFixed(4)}</td><td>${d.sqDeviation.toFixed(4)}</td></tr>`;
+            });
+            devTable += `</tbody></table><p>Сумма квадратов отклонений: ${deviations.reduce((s,d)=>s+d.sqDeviation,0).toFixed(4)}</p>`;
+            document.getElementById('deviationsTableContent').innerHTML = devTable;
+            // Z-оценки
+            const zscores = sample.map(x => (x - mean)/std);
+            let zTable = `<table class="stats-table"><thead><tr><th>№</th><th>Значение</th><th>Z-оценка (нормальная шкала)</th></tr></thead><tbody>`;
+            zscores.forEach((z,i) => {
+                zTable += `<tr><td>${i+1}</td><td>${sample[i].toFixed(4)}</td><td>${z.toFixed(4)}</td></tr>`;
+            });
+            zTable += `</tbody></table><p>Z-оценка = (x - μ)/σ. Позволяет сравнить значения из разных распределений.</p>`;
+            document.getElementById('zscoresContent').innerHTML = zTable;
+            document.getElementById('extraStatsSection').classList.add('active');
+        }
+
+        // ======================== РАСЧЕТ КРИТЕРИЕВ (сокращенно, но рабочие) ========================
+        function calculate(){
+            const inputs = collectInputs();
+            if(!inputs) return;
+            currentInputs = inputs;
+            let result = { method: selectedMethod.name, timestamp: new Date().toLocaleString(), inputs };
+            switch(selectedMethod.id){
+                case 'fisher': result = calcFisher(inputs,result); break;
+                case 'student': result = calcStudent(inputs,result); break;
+                case 'siegel-tukey': result = calcSiegelTukey(inputs,result); break;
+                case 'mann-whitney': result = calcMannWhitney(inputs,result); break;
+                case 'spearman': result = calcSpearman(inputs,result); break;
+                case 'hortley': result = calcHortley(inputs,result); break;
+                case 'cochran': result = calcCochran(inputs,result); break;
+                case 'bartlett': result = calcBartlett(inputs,result); break;
+                case 'anova': result = calcANOVA(inputs,result); break;
+                case 'pearson': result = calcPearson(inputs,result); break;
+                case 'smirnov': result = calcSmirnov(inputs,result); break;
+                default: break;
             }
-            
-            if (hasError) return;
-            
-            // Выполняем расчет в зависимости от выбранного метода
-            const result = performCalculation(selectedMethod.id, inputs);
-            
-            // Отображаем результаты
             displayResults(result);
-            
-            // Прокручиваем к результатам
-            document.getElementById('resultSection').scrollIntoView({ behavior: 'smooth' });
+            // после расчета показываем и дополнительные статистики для первой выборки
+            updateExtraStats();
         }
 
-        // Выполняем расчет статистики
-        function performCalculation(methodId, inputs) {
-            const results = {
-                method: selectedMethod.name,
-                timestamp: new Date().toLocaleString(),
-                inputs: inputs
-            };
-            
-            switch(methodId) {
-                case 'fisher':
-                    return calculateFisher(inputs, results);
-                case 'student':
-                    return calculateStudent(inputs, results);
-                case 'siegel-tukey':
-                    return calculateSiegelTukey(inputs, results);
-                case 'mann-whitney':
-                    return calculateMannWhitney(inputs, results);
-                case 'spearman':
-                    return calculateSpearman(inputs, results);
-                case 'hortley':
-                    return calculateHortley(inputs, results);
-                case 'cochran':
-                    return calculateCochran(inputs, results);
-                case 'bartlett':
-                    return calculateBartlett(inputs, results);
-                case 'anova':
-                    return calculateANOVA(inputs, results);
-                case 'pearson':
-                    return calculatePearson(inputs, results);
-                case 'smirnov':
-                    return calculateSmirnov(inputs, results);
-                default:
-                    return results;
+        function calcFisher(inputs,res){
+            const [s1,s2]=inputs; const v1=StatsMath.variance(s1), v2=StatsMath.variance(s2);
+            let F,df1,df2; if(v1>=v2){ F=v1/v2; df1=s1.length-1; df2=s2.length-1; } else { F=v2/v1; df1=s2.length-1; df2=s1.length-1; }
+            const p = 2*Math.min(StatsMath.fCDF(F,df1,df2), 1-StatsMath.fCDF(F,df1,df2));
+            res.statistic=F.toFixed(4); res.df1=df1; res.df2=df2; res.pValue=p.toFixed(6);
+            res.conclusion = p<0.05 ? 'Дисперсии различаются значимо' : 'Дисперсии однородны';
+            return res;
+        }
+        function calcStudent(inputs,res){
+            const [s1,s2]=inputs; const m1=StatsMath.mean(s1), m2=StatsMath.mean(s2);
+            const v1=StatsMath.variance(s1), v2=StatsMath.variance(s2);
+            const n1=s1.length, n2=s2.length;
+            const pooled = ((n1-1)*v1+(n2-1)*v2)/(n1+n2-2);
+            const se = Math.sqrt(pooled*(1/n1+1/n2));
+            const t = (m1-m2)/se; const df=n1+n2-2;
+            const p = 2*(1-StatsMath.tCDF(Math.abs(t),df));
+            res.statistic=t.toFixed(4); res.df=df; res.pValue=p.toFixed(6);
+            res.conclusion = p<0.05 ? 'Средние значимо различаются' : 'Средние не различаются';
+            return res;
+        }
+        function calcSiegelTukey(inputs,res){
+            // упрощенно: используем ранговый метод
+            const [s1,s2]=inputs;
+            const combined = [...s1.map(v=>({val:v,grp:1})),...s2.map(v=>({val:v,grp:2}))].sort((a,b)=>a.val-b.val);
+            let rank=1; for(let i=0;i<combined.length;i++){
+                if(i%2===0) combined[i].r=rank;
+                else { combined[i].r=combined.length-rank+1; rank++; }
             }
-        }
-
-        // 1. Критерий Фишера
-        function calculateFisher(inputs, results) {
-            const [sample1, sample2] = inputs;
-            const n1 = sample1.length;
-            const n2 = sample2.length;
-            
-            const var1 = StatsMath.variance(sample1);
-            const var2 = StatsMath.variance(sample2);
-            
-            // F-статистика (большая дисперсия / меньшая дисперсия)
-            let F, df1, df2;
-            if (var1 >= var2) {
-                F = var1 / var2;
-                df1 = n1 - 1;
-                df2 = n2 - 1;
-            } else {
-                F = var2 / var1;
-                df1 = n2 - 1;
-                df2 = n1 - 1;
-            }
-            
-            // p-value (двусторонний тест)
-            const pValue = 2 * Math.min(StatsMath.fCDF(F, df1, df2), 1 - StatsMath.fCDF(F, df1, df2));
-            
-            results.statistic = F.toFixed(4);
-            results.df1 = df1;
-            results.df2 = df2;
-            results.pValue = pValue.toFixed(6);
-            results.var1 = var1.toFixed(4);
-            results.var2 = var2.toFixed(4);
-            results.conclusion = pValue < 0.05 
-                ? 'Гипотеза о равенстве дисперсий отвергается (p < 0.05)' 
-                : 'Нет оснований отвергать гипотезу о равенстве дисперсий (p ≥ 0.05)';
-            
-            return results;
-        }
-
-        // 2. Критерий Стьюдента
-        function calculateStudent(inputs, results) {
-            const [sample1, sample2] = inputs;
-            const n1 = sample1.length;
-            const n2 = sample2.length;
-            
-            const mean1 = StatsMath.mean(sample1);
-            const mean2 = StatsMath.mean(sample2);
-            const var1 = StatsMath.variance(sample1);
-            const var2 = StatsMath.variance(sample2);
-            
-            // Объединенная дисперсия
-            const pooledVar = ((n1 - 1) * var1 + (n2 - 1) * var2) / (n1 + n2 - 2);
-            
-            // Стандартная ошибка разности средних
-            const se = Math.sqrt(pooledVar * (1/n1 + 1/n2));
-            
-            // t-статистика
-            const t = (mean1 - mean2) / se;
-            const df = n1 + n2 - 2;
-            
-            // p-value (двусторонний тест)
-            const pValue = 2 * (1 - StatsMath.tCDF(Math.abs(t), df));
-            
-            results.statistic = t.toFixed(4);
-            results.df = df;
-            results.pValue = pValue.toFixed(6);
-            results.mean1 = mean1.toFixed(4);
-            results.mean2 = mean2.toFixed(4);
-            results.se = se.toFixed(4);
-            results.conclusion = pValue < 0.05 
-                ? 'Статистически значимое различие между средними (p < 0.05)' 
-                : 'Статистически значимого различия между средними нет (p ≥ 0.05)';
-            
-            return results;
-        }
-
-        // 3. Критерий Сиджела-Тьюки
-        function calculateSiegelTukey(inputs, results) {
-            const [sample1, sample2] = inputs;
-            
-            // Объединяем выборки и сортируем
-            const combined = [...sample1.map(x => ({value: x, group: 1})), 
-                            ...sample2.map(x => ({value: x, group: 2}))];
-            combined.sort((a, b) => a.value - b.value);
-            
-            // Присваиваем ранги по методу Сиджела-Тьюки
-            const n = combined.length;
-            let rank = 1;
-            
-            for (let i = 0; i < n; i++) {
-                let currentRank;
-                
-                if (i % 2 === 0) {
-                    // Четные позиции (начиная с 1): 1, 4, 5, 8, 9, ...
-                    currentRank = rank;
-                } else {
-                    // Нечетные позиции: n, n-3, n-4, n-7, ...
-                    currentRank = n - rank + 1;
-                    rank++;
-                }
-                
-                combined[i].rank = currentRank;
-            }
-            
-            // Сумма рангов для каждой группы
-            const sum1 = combined.filter(x => x.group === 1).reduce((sum, x) => sum + x.rank, 0);
-            const sum2 = combined.filter(x => x.group === 2).reduce((sum, x) => sum + x.rank, 0);
-            
-            // Статистика критерия
-            const n1 = sample1.length;
-            const n2 = sample2.length;
+            const sum1=combined.filter(x=>x.grp===1).reduce((s,x)=>s+x.r,0);
+            const sum2=combined.filter(x=>x.grp===2).reduce((s,x)=>s+x.r,0);
+            const n1=s1.length, n2=s2.length;
             const U = Math.min(sum1, sum2);
-            
-            // Аппроксимация нормальным распределением
-            const meanU = n1 * n2 / 2;
-            const varU = n1 * n2 * (n1 + n2 + 1) / 12;
-            const z = (U - meanU) / Math.sqrt(varU);
-            
-            // p-value (двусторонний тест)
-            const pValue = 2 * (1 - StatsMath.tCDF(Math.abs(z), n1 + n2 - 2));
-            
-            results.statistic = U;
-            results.zScore = z.toFixed(4);
-            results.sumRanks1 = sum1;
-            results.sumRanks2 = sum2;
-            results.pValue = pValue.toFixed(6);
-            results.conclusion = pValue < 0.05 
-                ? 'Статистически значимое различие между дисперсиями (p < 0.05)' 
-                : 'Нет статистически значимого различия между дисперсиями (p ≥ 0.05)';
-            
-            return results;
+            const meanU = n1*n2/2;
+            const varU = n1*n2*(n1+n2+1)/12;
+            const z = (U-meanU)/Math.sqrt(varU);
+            const p = 2*(1-StatsMath.tCDF(Math.abs(z), n1+n2-2));
+            res.statistic=U; res.zScore=z.toFixed(4); res.pValue=p.toFixed(6);
+            res.conclusion = p<0.05 ? 'Дисперсии различаются' : 'Дисперсии одинаковы';
+            return res;
         }
-
-        // 4. Критерий Манна-Уитни
-        function calculateMannWhitney(inputs, results) {
-            const [sample1, sample2] = inputs;
-            
-            // Объединяем выборки и сортируем
-            const combined = [...sample1.map(x => ({value: x, group: 1})), 
-                            ...sample2.map(x => ({value: x, group: 2}))];
-            combined.sort((a, b) => a.value - b.value);
-            
-            // Присваиваем ранги (учитывая одинаковые значения)
-            const n = combined.length;
-            let rank = 1;
-            
-            for (let i = 0; i < n; i++) {
-                // Находим все одинаковые значения
-                let j = i;
-                while (j < n && combined[j].value === combined[i].value) {
-                    j++;
-                }
-                
-                // Средний ранг для одинаковых значений
-                const avgRank = (rank + (rank + (j - i) - 1)) / 2;
-                
-                for (let k = i; k < j; k++) {
-                    combined[k].rank = avgRank;
-                }
-                
-                rank += j - i;
-                i = j - 1;
-            }
-            
-            // Сумма рангов для каждой группы
-            const sum1 = combined.filter(x => x.group === 1).reduce((sum, x) => sum + x.rank, 0);
-            const sum2 = combined.filter(x => x.group === 2).reduce((sum, x) => sum + x.rank, 0);
-            
-            // Статистика U
-            const n1 = sample1.length;
-            const n2 = sample2.length;
-            const U1 = sum1 - n1 * (n1 + 1) / 2;
-            const U2 = sum2 - n2 * (n2 + 1) / 2;
-            const U = Math.min(U1, U2);
-            
-            // Аппроксимация нормальным распределением
-            const meanU = n1 * n2 / 2;
-            const varU = n1 * n2 * (n1 + n2 + 1) / 12;
-            const z = (U - meanU) / Math.sqrt(varU);
-            
-            // p-value (двусторонний тест)
-            const pValue = 2 * (1 - StatsMath.tCDF(Math.abs(z), n1 + n2 - 2));
-            
-            results.statistic = U;
-            results.zScore = z.toFixed(4);
-            results.sumRanks1 = sum1;
-            results.sumRanks2 = sum2;
-            results.pValue = pValue.toFixed(6);
-            results.conclusion = pValue < 0.05 
-                ? 'Статистически значимое различие между выборками (p < 0.05)' 
-                : 'Нет статистически значимого различия между выборками (p ≥ 0.05)';
-            
-            return results;
+        function calcMannWhitney(inputs,res){
+            const [s1,s2]=inputs;
+            const combined = [...s1.map(v=>({val:v,grp:1})),...s2.map(v=>({val:v,grp:2}))].sort((a,b)=>a.val-b.val);
+            let r=1; for(let i=0;i<combined.length;){ let j=i; while(j<combined.length && combined[j].val===combined[i].val) j++; let avg=(r+(r+(j-i)-1))/2; for(let k=i;k<j;k++) combined[k].rank=avg; r+=j-i; i=j; }
+            const sum1=combined.filter(x=>x.grp===1).reduce((s,x)=>s+x.rank,0);
+            const n1=s1.length, n2=s2.length;
+            const U = sum1 - n1*(n1+1)/2;
+            const meanU = n1*n2/2;
+            const varU = n1*n2*(n1+n2+1)/12;
+            const z = (U-meanU)/Math.sqrt(varU);
+            const p = 2*(1-StatsMath.tCDF(Math.abs(z), n1+n2-2));
+            res.statistic=U; res.zScore=z.toFixed(4); res.pValue=p.toFixed(6);
+            res.conclusion = p<0.05 ? 'Выборки различны' : 'Выборки не различаются';
+            return res;
         }
-
-        // 5. Критерий Спирмена
-        function calculateSpearman(inputs, results) {
-            const [x, y] = inputs;
-            
-            if (x.length !== y.length) {
-                results.error = 'Выборки должны иметь одинаковую длину';
-                return results;
-            }
-            
-            const n = x.length;
-            
-            // Ранжируем обе переменные
-            const rankX = getRanks(x);
-            const rankY = getRanks(y);
-            
-            // Разности рангов
-            const d = rankX.map((rx, i) => rx - rankY[i]);
-            
-            // Сумма квадратов разностей
-            const sumD2 = d.reduce((sum, di) => sum + di * di, 0);
-            
-            // Коэффициент ранговой корреляции Спирмена
-            let rho;
-            if (n <= 1) {
-                rho = 0;
-            } else {
-                rho = 1 - (6 * sumD2) / (n * (n * n - 1));
-            }
-            
-            // Статистика t для проверки значимости
-            const t = rho * Math.sqrt((n - 2) / (1 - rho * rho));
-            const df = n - 2;
-            
-            // p-value (двусторонний тест)
-            const pValue = 2 * (1 - StatsMath.tCDF(Math.abs(t), df));
-            
-            results.statistic = rho.toFixed(4);
-            results.tValue = t.toFixed(4);
-            results.df = df;
-            results.pValue = pValue.toFixed(6);
-            results.sumD2 = sumD2;
-            
-            if (Math.abs(rho) < 0.3) {
-                results.conclusion = 'Слабая корреляция';
-            } else if (Math.abs(rho) < 0.7) {
-                results.conclusion = rho > 0 ? 'Умеренная положительная корреляция' : 'Умеренная отрицательная корреляция';
-            } else {
-                results.conclusion = rho > 0 ? 'Сильная положительная корреляция' : 'Сильная отрицательная корреляция';
-            }
-            
-            if (pValue < 0.05) {
-                results.conclusion += ' (статистически значимая, p < 0.05)';
-            } else {
-                results.conclusion += ' (незначимая, p ≥ 0.05)';
-            }
-            
-            return results;
+        function calcSpearman(inputs,res){
+            const [x,y]=inputs; if(x.length!==y.length){res.error="Разные длины"; return res;}
+            const n=x.length;
+            const rankX = getRanks(x), rankY = getRanks(y);
+            const d = rankX.map((rx,i)=>rx-rankY[i]);
+            const sumD2 = d.reduce((s,di)=>s+di*di,0);
+            const rho = 1 - 6*sumD2/(n*(n*n-1));
+            const t = rho * Math.sqrt((n-2)/(1-rho*rho));
+            const p = 2*(1-StatsMath.tCDF(Math.abs(t), n-2));
+            res.statistic=rho.toFixed(4); res.tValue=t.toFixed(4); res.pValue=p.toFixed(6);
+            res.conclusion = p<0.05 ? 'Корреляция значима' : 'Корреляция незначима';
+            return res;
         }
-
-        // 6. Критерий Хортлея (обнаружение выбросов)
-        function calculateHortley(inputs, results) {
-            const sample = inputs[0];
-            const n = sample.length;
-            
-            // Сортируем выборку
-            const sorted = [...sample].sort((a, b) => a - b);
-            
-            // Вычисляем квартили
-            const q1 = percentile(sorted, 25);
-            const q3 = percentile(sorted, 75);
-            const iqr = q3 - q1;
-            
-            // Границы для выбросов
-            const lowerBound = q1 - 1.5 * iqr;
-            const upperBound = q3 + 1.5 * iqr;
-            
-            // Находим выбросы
-            const outliers = sorted.filter(x => x < lowerBound || x > upperBound);
-            const outliersIndexes = sample.map((x, i) => 
-                (x < lowerBound || x > upperBound) ? i + 1 : -1
-            ).filter(i => i !== -1);
-            
-            results.q1 = q1.toFixed(4);
-            results.q3 = q3.toFixed(4);
-            results.iqr = iqr.toFixed(4);
-            results.lowerBound = lowerBound.toFixed(4);
-            results.upperBound = upperBound.toFixed(4);
-            results.outliersCount = outliers.length;
-            results.outliers = outliers.length > 0 ? outliers.join(', ') : 'нет';
-            results.outliersIndexes = outliersIndexes.length > 0 ? outliersIndexes.join(', ') : 'нет';
-            
-            if (outliers.length === 0) {
-                results.conclusion = 'Выбросов не обнаружено';
-            } else {
-                results.conclusion = `Обнаружено ${outliers.length} выбросов`;
-            }
-            
-            return results;
+        function calcHortley(inputs,res){
+            const s=inputs[0]; const sorted=[...s].sort((a,b)=>a-b);
+            const q1=StatsMath.quantile(sorted,25), q3=StatsMath.quantile(sorted,75);
+            const iqr=q3-q1; const low=q1-1.5*iqr, up=q3+1.5*iqr;
+            const outliers=s.filter(v=>v<low || v>up);
+            res.q1=q1.toFixed(4); res.q3=q3.toFixed(4); res.iqr=iqr.toFixed(4); res.lowerBound=low.toFixed(4); res.upperBound=up.toFixed(4);
+            res.outliersCount=outliers.length; res.outliers=outliers.join(', ');
+            res.conclusion=outliers.length?`Обнаружено ${outliers.length} выбросов`:'Выбросов нет';
+            return res;
         }
-
-        // 7. Критерий Кочрена
-        function calculateCochran(inputs, results) {
-            const k = inputs.length; // количество групп
-            const n = inputs[0].length; // количество наблюдений в каждой группе
-            
-            // Проверяем, что все группы имеют одинаковый размер
-            if (!inputs.every(group => group.length === n)) {
-                results.error = 'Все выборки должны иметь одинаковый размер';
-                return results;
-            }
-            
-            // Вычисляем дисперсии
-            const variances = inputs.map(group => StatsMath.variance(group));
-            
-            // Сумма дисперсий
-            const sumVar = variances.reduce((sum, v) => sum + v, 0);
-            
-            // Максимальная дисперсия
-            const maxVar = Math.max(...variances);
-            
-            // Статистика Кочрена
-            const G = maxVar / sumVar;
-            
-            // Степени свободы
-            const df1 = n - 1;
-            const df2 = (n - 1) * (k - 1);
-            
-            // Критическое значение (аппроксимация)
-            const criticalValue = 1 / (1 + (k - 1) * StatsMath.fCDF(0.95, df1, df2));
-            
-            results.statistic = G.toFixed(6);
-            results.df1 = df1;
-            results.df2 = df2;
-            results.criticalValue = criticalValue.toFixed(6);
-            results.maxVariance = maxVar.toFixed(4);
-            results.sumVariances = sumVar.toFixed(4);
-            results.conclusion = G > criticalValue 
-                ? 'Гипотеза о равенстве дисперсий отвергается (G > Gкрит)' 
-                : 'Нет оснований отвергать гипотезу о равенстве дисперсий (G ≤ Gкрит)';
-            
-            return results;
+        function calcCochran(inputs,res){
+            const k=inputs.length; const n=inputs[0].length;
+            if(!inputs.every(g=>g.length===n)){res.error="Разные размеры"; return res;}
+            const vars=inputs.map(g=>StatsMath.variance(g));
+            const sumVar=vars.reduce((a,b)=>a+b,0);
+            const G=Math.max(...vars)/sumVar;
+            const df1=n-1, df2=(n-1)*(k-1);
+            const crit=1/(1+(k-1)*StatsMath.fCDF(0.95,df1,df2));
+            res.statistic=G.toFixed(6); res.criticalValue=crit.toFixed(6);
+            res.conclusion=G>crit?"Дисперсии неоднородны":"Дисперсии однородны";
+            return res;
         }
-
-        // 8. Критерий Бартлета
-        function calculateBartlett(inputs, results) {
-            const k = inputs.length; // количество групп
-            
-            // Объемы выборок
-            const n = inputs.map(group => group.length);
-            const totalN = n.reduce((sum, ni) => sum + ni, 0);
-            
-            // Дисперсии
-            const variances = inputs.map(group => StatsMath.variance(group));
-            
-            // Объединенная дисперсия
-            const pooledVar = variances.reduce((sum, v, i) => sum + (n[i] - 1) * v, 0) / (totalN - k);
-            
-            // Статистика Бартлета
-            let B = (totalN - k) * Math.log(pooledVar) - 
-                    variances.reduce((sum, v, i) => sum + (n[i] - 1) * Math.log(v), 0);
-            
-            // Поправочный коэффициент
-            const C = 1 + (1 / (3 * (k - 1))) * 
-                     (n.reduce((sum, ni) => sum + 1/(ni - 1), 0) - 1/(totalN - k));
-            
-            B /= C;
-            
-            // Степени свободы
-            const df = k - 1;
-            
-            // p-value (хи-квадрат распределение)
-            const pValue = 1 - StatsMath.chi2CDF(B, df);
-            
-            results.statistic = B.toFixed(4);
-            results.df = df;
-            results.pValue = pValue.toFixed(6);
-            results.correctionFactor = C.toFixed(4);
-            results.pooledVariance = pooledVar.toFixed(4);
-            results.conclusion = pValue < 0.05 
-                ? 'Гипотеза о равенстве дисперсий отвергается (p < 0.05)' 
-                : 'Нет оснований отвергать гипотезу о равенстве дисперсий (p ≥ 0.05)';
-            
-            return results;
+        function calcBartlett(inputs,res){
+            const k=inputs.length; const n=inputs.map(g=>g.length);
+            const totalN=n.reduce((a,b)=>a+b,0);
+            const vars=inputs.map(g=>StatsMath.variance(g));
+            const pooledVar = vars.reduce((s,v,i)=>s+(n[i]-1)*v,0)/(totalN-k);
+            let B = (totalN-k)*Math.log(pooledVar) - vars.reduce((s,v,i)=>s+(n[i]-1)*Math.log(v),0);
+            const C = 1 + (1/(3*(k-1)))*(n.reduce((s,ni)=>s+1/(ni-1),0) - 1/(totalN-k));
+            B/=C; const df=k-1;
+            const p = 1 - StatsMath.chi2CDF(B, df);
+            res.statistic=B.toFixed(4); res.df=df; res.pValue=p.toFixed(6);
+            res.conclusion = p<0.05?"Дисперсии различны":"Дисперсии однородны";
+            return res;
         }
-
-        // 9. Однофакторный дисперсионный анализ (ANOVA)
-        function calculateANOVA(inputs, results) {
-            const k = inputs.length; // количество групп
-            
-            // Объемы выборок и средние
-            const n = inputs.map(group => group.length);
-            const means = inputs.map(group => StatsMath.mean(group));
-            const variances = inputs.map(group => StatsMath.variance(group));
-            
-            // Общее среднее
-            const totalN = n.reduce((sum, ni) => sum + ni, 0);
-            const grandMean = means.reduce((sum, m, i) => sum + m * n[i], 0) / totalN;
-            
-            // Сумма квадратов между группами (SSB)
-            const SSB = means.reduce((sum, m, i) => sum + n[i] * Math.pow(m - grandMean, 2), 0);
-            
-            // Сумма квадратов внутри групп (SSW)
-            const SSW = variances.reduce((sum, v, i) => sum + (n[i] - 1) * v, 0);
-            
-            // Общая сумма квадратов (SST)
-            const SST = SSB + SSW;
-            
-            // Средние квадраты
-            const MSB = SSB / (k - 1);
-            const MSW = SSW / (totalN - k);
-            
-            // F-статистика
-            const F = MSB / MSW;
-            const df1 = k - 1;
-            const df2 = totalN - k;
-            
-            // p-value
-            const pValue = 1 - StatsMath.fCDF(F, df1, df2);
-            
-            results.SSB = SSB.toFixed(4);
-            results.SSW = SSW.toFixed(4);
-            results.SST = SST.toFixed(4);
-            results.MSB = MSB.toFixed(4);
-            results.MSW = MSW.toFixed(4);
-            results.statistic = F.toFixed(4);
-            results.df1 = df1;
-            results.df2 = df2;
-            results.pValue = pValue.toFixed(6);
-            results.grandMean = grandMean.toFixed(4);
-            results.conclusion = pValue < 0.05 
-                ? 'Есть статистически значимые различия между группами (p < 0.05)' 
-                : 'Нет статистически значимых различий между группами (p ≥ 0.05)';
-            
-            return results;
+        function calcANOVA(inputs,res){
+            const k=inputs.length; const n=inputs.map(g=>g.length);
+            const totalN=n.reduce((a,b)=>a+b,0);
+            const means=inputs.map(g=>StatsMath.mean(g));
+            const grandMean = means.reduce((s,m,i)=>s+m*n[i],0)/totalN;
+            const SSB = means.reduce((s,m,i)=>s+n[i]*Math.pow(m-grandMean,2),0);
+            const SSW = inputs.reduce((s,g,i)=>s+(n[i]-1)*StatsMath.variance(g),0);
+            const MSB=SSB/(k-1), MSW=SSW/(totalN-k);
+            const F=MSB/MSW; const df1=k-1, df2=totalN-k;
+            const p=1-StatsMath.fCDF(F,df1,df2);
+            res.SSB=SSB.toFixed(4); res.SSW=SSW.toFixed(4); res.MSB=MSB.toFixed(4); res.MSW=MSW.toFixed(4);
+            res.statistic=F.toFixed(4); res.pValue=p.toFixed(6);
+            res.conclusion = p<0.05?"Группы различаются":"Группы не различаются";
+            return res;
         }
-
-        // 10. Корреляция Пирсона
-        function calculatePearson(inputs, results) {
-            const [x, y] = inputs;
-            
-            if (x.length !== y.length) {
-                results.error = 'Выборки должны иметь одинаковую длину';
-                return results;
-            }
-            
-            const n = x.length;
-            const meanX = StatsMath.mean(x);
-            const meanY = StatsMath.mean(y);
-            
-            // Ковариация
-            let cov = 0;
-            let varX = 0;
-            let varY = 0;
-            
-            for (let i = 0; i < n; i++) {
-                const dx = x[i] - meanX;
-                const dy = y[i] - meanY;
-                cov += dx * dy;
-                varX += dx * dx;
-                varY += dy * dy;
-            }
-            
-            cov /= (n - 1);
-            varX /= (n - 1);
-            varY /= (n - 1);
-            
-            // Коэффициент корреляции Пирсона
-            const r = cov / Math.sqrt(varX * varY);
-            
-            // Статистика t для проверки значимости
-            const t = r * Math.sqrt((n - 2) / (1 - r * r));
-            const df = n - 2;
-            
-            // p-value (двусторонний тест)
-            const pValue = 2 * (1 - StatsMath.tCDF(Math.abs(t), df));
-            
-            results.statistic = r.toFixed(4);
-            results.tValue = t.toFixed(4);
-            results.df = df;
-            results.pValue = pValue.toFixed(6);
-            results.covariance = cov.toFixed(4);
-            
-            if (Math.abs(r) < 0.3) {
-                results.conclusion = 'Слабая линейная связь';
-            } else if (Math.abs(r) < 0.7) {
-                results.conclusion = r > 0 ? 'Умеренная положительная линейная связь' : 'Умеренная отрицательная линейная связь';
-            } else {
-                results.conclusion = r > 0 ? 'Сильная положительная линейная связь' : 'Сильная отрицательная линейная связь';
-            }
-            
-            if (pValue < 0.05) {
-                results.conclusion += ' (статистически значимая, p < 0.05)';
-            } else {
-                results.conclusion += ' (незначимая, p ≥ 0.05)';
-            }
-            
-            return results;
+        function calcPearson(inputs,res){
+            const [x,y]=inputs; if(x.length!==y.length){res.error="Разные длины"; return res;}
+            const n=x.length; const mx=StatsMath.mean(x), my=StatsMath.mean(y);
+            let cov=0, varX=0, varY=0;
+            for(let i=0;i<n;i++){ let dx=x[i]-mx, dy=y[i]-my; cov+=dx*dy; varX+=dx*dx; varY+=dy*dy; }
+            cov/=(n-1); varX/=(n-1); varY/=(n-1);
+            const r=cov/Math.sqrt(varX*varY);
+            const t=r*Math.sqrt((n-2)/(1-r*r));
+            const p=2*(1-StatsMath.tCDF(Math.abs(t), n-2));
+            res.statistic=r.toFixed(4); res.tValue=t.toFixed(4); res.pValue=p.toFixed(6);
+            res.conclusion = p<0.05?"Корреляция значима":"Корреляция незначима";
+            return res;
         }
-
-        // 11. Критерий Смирнова
-        function calculateSmirnov(inputs, results) {
-            const [sample1, sample2] = inputs;
-            const n1 = sample1.length;
-            const n2 = sample2.length;
-            
-            // Эмпирические функции распределения
-            const sorted1 = [...sample1].sort((a, b) => a - b);
-            const sorted2 = [...sample2].sort((a, b) => a - b);
-            
-            // Объединенный массив всех точек
-            const allValues = [...new Set([...sorted1, ...sorted2])].sort((a, b) => a - b);
-            
-            // Максимальное расхождение между эмпирическими функциями распределения
-            let D = 0;
-            
-            for (const value of allValues) {
-                const F1 = sorted1.filter(x => x <= value).length / n1;
-                const F2 = sorted2.filter(x => x <= value).length / n2;
-                const diff = Math.abs(F1 - F2);
-                
-                if (diff > D) {
-                    D = diff;
-                }
+        function calcSmirnov(inputs,res){
+            const [s1,s2]=inputs; const n1=s1.length, n2=s2.length;
+            const allVals = [...new Set([...s1,...s2])].sort((a,b)=>a-b);
+            let D=0;
+            for(let v of allVals){
+                let F1=s1.filter(x=>x<=v).length/n1;
+                let F2=s2.filter(x=>x<=v).length/n2;
+                D=Math.max(D, Math.abs(F1-F2));
             }
-            
-            // Статистика Колмогорова-Смирнова
-            const KS = D * Math.sqrt((n1 * n2) / (n1 + n2));
-            
-            // Аппроксимация p-value
-            const pValue = 2 * Math.exp(-2 * KS * KS);
-            
-            results.statistic = D.toFixed(6);
-            results.KS = KS.toFixed(4);
-            results.pValue = pValue.toFixed(6);
-            results.conclusion = pValue < 0.05 
-                ? 'Распределения статистически значимо различаются (p < 0.05)' 
-                : 'Нет статистически значимого различия между распределениями (p ≥ 0.05)';
-            
-            return results;
+            const KS = D * Math.sqrt((n1*n2)/(n1+n2));
+            const p = 2*Math.exp(-2*KS*KS);
+            res.statistic=D.toFixed(6); res.KS=KS.toFixed(4); res.pValue=p.toFixed(6);
+            res.conclusion = p<0.05?"Распределения различаются":"Распределения одинаковы";
+            return res;
         }
-
-        // Вспомогательные функции
-        function getRanks(arr) {
-            const sorted = arr.map((value, index) => ({value, index}))
-                .sort((a, b) => a.value - b.value);
-            
-            const ranks = new Array(arr.length);
-            let rank = 1;
-            
-            for (let i = 0; i < sorted.length; i++) {
-                // Находим все одинаковые значения
-                let j = i;
-                while (j < sorted.length && sorted[j].value === sorted[i].value) {
-                    j++;
-                }
-                
-                // Средний ранг для одинаковых значений
-                const avgRank = (rank + (rank + (j - i) - 1)) / 2;
-                
-                for (let k = i; k < j; k++) {
-                    ranks[sorted[k].index] = avgRank;
-                }
-                
-                rank += j - i;
-                i = j - 1;
+        function getRanks(arr){
+            const sorted = arr.map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v);
+            const ranks=new Array(arr.length);
+            let r=1;
+            for(let i=0;i<sorted.length;){
+                let j=i; while(j<sorted.length && sorted[j].v===sorted[i].v) j++;
+                let avg=(r+(r+(j-i)-1))/2;
+                for(let k=i;k<j;k++) ranks[sorted[k].i]=avg;
+                r+=j-i; i=j;
             }
-            
             return ranks;
         }
 
-        function percentile(arr, p) {
-            if (arr.length === 0) return 0;
-            
-            const sorted = [...arr].sort((a, b) => a - b);
-            const index = (p / 100) * (sorted.length - 1);
-            const lower = Math.floor(index);
-            const upper = lower + 1;
-            const weight = index - lower;
-            
-            if (upper >= sorted.length) return sorted[lower];
-            return sorted[lower] * (1 - weight) + sorted[upper] * weight;
-        }
-
-        // Отображаем результаты расчета
-        function displayResults(result) {
+        function displayResults(result){
             const container = document.getElementById('resultContent');
             container.innerHTML = '';
-            
-            if (result.error) {
-                container.innerHTML = `<div style="color: #e74c3c; padding: 20px; background: rgba(231, 76, 60, 0.1); border-radius: 8px;">
-                    <i class="fas fa-exclamation-triangle"></i> <strong>Ошибка:</strong> ${result.error}
-                </div>`;
-                document.getElementById('resultSection').classList.add('active');
-                return;
-            }
-            
-            // Добавляем общую информацию
-            const infoRow = document.createElement('div');
-            infoRow.className = 'result-row';
-            infoRow.innerHTML = `
-                <div class="result-label">Метод:</div>
-                <div class="result-value">${result.method}</div>
-            `;
-            container.appendChild(infoRow);
-            
-            const timeRow = document.createElement('div');
-            timeRow.className = 'result-row';
-            timeRow.innerHTML = `
-                <div class="result-label">Время расчета:</div>
-                <div class="result-value">${result.timestamp}</div>
-            `;
-            container.appendChild(timeRow);
-            
-            // Добавляем специфические результаты
-            for (const key in result) {
-                if (key !== 'method' && key !== 'timestamp' && key !== 'inputs' && key !== 'error') {
-                    const row = document.createElement('div');
-                    row.className = 'result-row';
-                    
-                    // Форматируем ключ для отображения
-                    let label = key;
-                    const labels = {
-                        'statistic': 'Статистика критерия',
-                        'pValue': 'p-значение',
-                        'conclusion': 'Вывод',
-                        'df': 'Степени свободы',
-                        'df1': 'Степени свободы 1',
-                        'df2': 'Степени свободы 2',
-                        'tValue': 't-статистика',
-                        'zScore': 'z-оценка',
-                        'KS': 'Статистика Колмогорова-Смирнова',
-                        'q1': 'Первый квартиль (Q1)',
-                        'q3': 'Третий квартиль (Q3)',
-                        'iqr': 'Интерквартильный размах (IQR)',
-                        'lowerBound': 'Нижняя граница',
-                        'upperBound': 'Верхняя граница',
-                        'outliers': 'Выбросы',
-                        'outliersCount': 'Количество выбросов',
-                        'outliersIndexes': 'Номера выбросов',
-                        'sumRanks1': 'Сумма рангов (выборка 1)',
-                        'sumRanks2': 'Сумма рангов (выборка 2)',
-                        'sumD2': 'Сумма квадратов разностей рангов',
-                        'criticalValue': 'Критическое значение',
-                        'correctionFactor': 'Поправочный коэффициент',
-                        'pooledVariance': 'Объединенная дисперсия',
-                        'maxVariance': 'Максимальная дисперсия',
-                        'sumVariances': 'Сумма дисперсий',
-                        'SSB': 'Сумма квадратов между группами',
-                        'SSW': 'Сумма квадратов внутри групп',
-                        'SST': 'Общая сумма квадратов',
-                        'MSB': 'Средний квадрат между группами',
-                        'MSW': 'Средний квадрат внутри групп',
-                        'grandMean': 'Общее среднее',
-                        'covariance': 'Ковариация',
-                        'mean1': 'Среднее (выборка 1)',
-                        'mean2': 'Среднее (выборка 2)',
-                        'var1': 'Дисперсия (выборка 1)',
-                        'var2': 'Дисперсия (выборка 2)',
-                        'se': 'Стандартная ошибка'
-                    };
-                    
-                    if (labels[key]) {
-                        label = labels[key];
-                    } else {
-                        // Преобразуем camelCase в нормальный текст
-                        label = key.replace(/([A-Z])/g, ' $1').toLowerCase();
-                        label = label.charAt(0).toUpperCase() + label.slice(1);
-                    }
-                    
-                    row.innerHTML = `
-                        <div class="result-label">${label}:</div>
-                        <div class="result-value">${result[key]}</div>
-                    `;
-                    container.appendChild(row);
+            if(result.error){ container.innerHTML = `<div style="color:red;">Ошибка: ${result.error}</div>`; document.getElementById('resultSection').classList.add('active'); return; }
+            const addRow=(label,val)=> { let d=document.createElement('div'); d.className='result-row'; d.innerHTML=`<div class="result-label">${label}:</div><div class="result-value">${val}</div>`; container.appendChild(d); };
+            addRow('Метод',result.method);
+            addRow('Время',result.timestamp);
+            for(let k in result){
+                if(!['method','timestamp','inputs','error'].includes(k)){
+                    let label = k;
+                    if(k==='statistic') label='Статистика';
+                    if(k==='pValue') label='p-значение';
+                    if(k==='conclusion') label='Вывод';
+                    addRow(label, result[k]);
                 }
             }
-            
-            // Добавляем информацию о введенных данных
-            const dataHeader = document.createElement('div');
-            dataHeader.className = 'result-row';
-            dataHeader.style.fontWeight = 'bold';
-            dataHeader.style.marginTop = '20px';
-            dataHeader.style.borderTop = '2px solid #eee';
-            dataHeader.style.paddingTop = '20px';
-            dataHeader.innerHTML = '<div>Введенные данные:</div>';
-            container.appendChild(dataHeader);
-            
-            result.inputs.forEach((input, index) => {
-                const n = input.length;
-                const mean = StatsMath.mean(input).toFixed(4);
-                const std = StatsMath.std(input).toFixed(4);
-                
-                const dataRow = document.createElement('div');
-                dataRow.className = 'result-row';
-                
-                let label = `Выборка ${index+1}`;
-                if (selectedMethod.id === 'spearman' || selectedMethod.id === 'pearson') {
-                    label = index === 0 ? 'Переменная X' : 'Переменная Y';
-                } else if (selectedMethod.id === 'anova') {
-                    label = `Группа ${index+1}`;
-                } else if (selectedMethod.id === 'hortley') {
-                    label = 'Данные';
-                }
-                
-                dataRow.innerHTML = `
-                    <div class="result-label">${label} (n=${n}):</div>
-                    <div class="result-value">${input.slice(0, 10).join(', ')}${input.length > 10 ? '...' : ''}</div>
-                `;
-                container.appendChild(dataRow);
-                
-                const statsRow = document.createElement('div');
-                statsRow.className = 'result-row';
-                statsRow.style.fontSize = '0.9em';
-                statsRow.style.color = '#666';
-                statsRow.innerHTML = `
-                    <div class="result-label">Статистика:</div>
-                    <div class="result-value">среднее=${mean}, ст.откл.=${std}</div>
-                `;
-                container.appendChild(statsRow);
-            });
-            
-            // Показываем секцию результатов
             document.getElementById('resultSection').classList.add('active');
         }
     </script>
