@@ -51,6 +51,79 @@
             max-width: 800px;
             margin: 0 auto;
         }
+        /* Блок описательной статистики */
+        .descriptive-stats-block {
+            background: rgba(255,255,255,0.98);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            border: 1px solid rgba(26,41,128,0.2);
+        }
+        .descriptive-stats-block h2 {
+            color: #1a2980;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .descriptive-input-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+        .descriptive-input-area textarea {
+            flex: 2;
+            min-width: 250px;
+            height: 120px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            resize: vertical;
+        }
+        .descriptive-input-area button {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            align-self: center;
+        }
+        .descriptive-results {
+            margin-top: 20px;
+            display: none;
+        }
+        .descriptive-results.active {
+            display: block;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .stat-card .stat-value {
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #1a2980;
+        }
         .methods-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -159,10 +232,6 @@
             border-radius: 8px;
             resize: vertical;
         }
-        .data-input textarea:focus {
-            border-color: #1a2980;
-            outline: none;
-        }
         .calc-btn {
             background: linear-gradient(to right, #1a2980, #26d0ce);
             color: white;
@@ -203,6 +272,8 @@
             border-collapse: collapse;
             margin-top: 20px;
             font-size: 0.9rem;
+            overflow-x: auto;
+            display: block;
         }
         .stats-table th, .stats-table td {
             border: 1px solid #ddd;
@@ -212,31 +283,6 @@
         .stats-table th {
             background: linear-gradient(135deg, #1a2980, #26d0ce);
             color: white;
-        }
-        .tab-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #ddd;
-            padding-bottom: 10px;
-        }
-        .tab-btn {
-            background: #f0f0f0;
-            border: none;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 5px 5px 0 0;
-            font-weight: 600;
-        }
-        .tab-btn.active {
-            background: linear-gradient(135deg, #1a2980, #26d0ce);
-            color: white;
-        }
-        .tab-content {
-            display: none;
-        }
-        .tab-content.active {
-            display: block;
         }
         .footer {
             text-align: center;
@@ -263,6 +309,7 @@
         @media (max-width: 768px) {
             .methods-grid { grid-template-columns: 1fr; }
             .result-row { flex-direction: column; gap: 5px; }
+            .stats-table { font-size: 0.7rem; }
         }
     </style>
 </head>
@@ -272,6 +319,21 @@
         <h1>ВСЁ ДЛЯ ФИПСИ от ВТ</h1>
         <p>Статистический анализ данных. Критерии, описательные статистики, таблица отклонений, Z-преобразование.</p>
     </header>
+
+    <!-- Отдельная плашка описательной статистики -->
+    <div class="descriptive-stats-block">
+        <h2><i class="fas fa-chart-simple"></i> 📊 Описательная статистика</h2>
+        <div class="descriptive-input-area">
+            <textarea id="descInput" placeholder="Введите числа через запятую&#10;Например: 12, 15, 18, 20, 22, 25"></textarea>
+            <button id="calcDescStatsBtn"><i class="fas fa-calculator"></i> Рассчитать статистики</button>
+            <button id="fillDescExampleBtn" class="action-btn" style="background: #6c757d;"><i class="fas fa-magic"></i> Пример</button>
+        </div>
+        <div id="descriptiveResults" class="descriptive-results">
+            <div class="stats-grid" id="descStatsGrid"></div>
+            <div id="descDeviationsTable"></div>
+            <div id="descZScoresTable"></div>
+        </div>
+    </div>
 
     <div class="methods-grid" id="methodsContainer"></div>
 
@@ -301,7 +363,7 @@
     </div>
 
     <div class="result-section" id="extraStatsSection">
-        <h2><i class="fas fa-chart-bar"></i> Описательные статистики выборки</h2>
+        <h2><i class="fas fa-chart-bar"></i> Детальная статистика выбранной выборки</h2>
         <div class="tab-buttons">
             <button class="tab-btn active" data-tab="desc">Основные статистики</button>
             <button class="tab-btn" data-tab="deviations">Таблица отклонений</button>
@@ -449,6 +511,12 @@
         renderMethods();
         attachGlobalEvents();
         selectMethod('fisher');
+        // Обработчики для плашки описательной статистики
+        document.getElementById('calcDescStatsBtn').addEventListener('click', computeDescriptiveStats);
+        document.getElementById('fillDescExampleBtn').addEventListener('click', () => {
+            document.getElementById('descInput').value = '12, 15, 18, 20, 22, 25, 28, 30';
+            computeDescriptiveStats();
+        });
     });
 
     function renderMethods() {
@@ -604,6 +672,12 @@
         const idx = parseInt(document.getElementById('analysisSampleSelect').value);
         const sample = inputs[idx];
         if(!sample || sample.length<2) { showError('Недостаточно данных'); return; }
+        displayDetailedStats(sample, 'descStatsContent', 'deviationsTableContent', 'zscoresContent');
+        document.getElementById('extraStatsSection').classList.add('active');
+    }
+
+    // Универсальная функция отображения статистик, таблиц и Z
+    function displayDetailedStats(sample, descContainerId, devContainerId, zContainerId) {
         const mean = StatsMath.mean(sample);
         const variance = StatsMath.variance(sample);
         const std = StatsMath.std(sample);
@@ -611,7 +685,8 @@
         const kurt = StatsMath.kurtosis(sample);
         const min = Math.min(...sample), max = Math.max(...sample);
         const q1 = StatsMath.quantile(sample,25), median = StatsMath.quantile(sample,50), q3 = StatsMath.quantile(sample,75);
-        document.getElementById('descStatsContent').innerHTML = `
+        
+        const descHtml = `
             <div class="result-row"><div class="result-label">Объем (n):</div><div class="result-value">${sample.length}</div></div>
             <div class="result-row"><div class="result-label">Среднее:</div><div class="result-value">${mean.toFixed(4)}</div></div>
             <div class="result-row"><div class="result-label">Дисперсия:</div><div class="result-value">${variance.toFixed(4)}</div></div>
@@ -624,7 +699,9 @@
             <div class="result-row"><div class="result-label">Q3:</div><div class="result-value">${q3.toFixed(4)}</div></div>
             <div class="result-row"><div class="result-label">Max:</div><div class="result-value">${max.toFixed(4)}</div></div>
         `;
-        // Таблица отклонений
+        document.getElementById(descContainerId).innerHTML = descHtml;
+
+        // Таблица отклонений и квадратов
         let devHtml = '<table class="stats-table"><thead><tr><th>№</th><th>Значение</th><th>Отклонение</th><th>Квадрат отклонения</th></tr></thead><tbody>';
         let sumSq=0;
         sample.forEach((val,i)=>{
@@ -634,7 +711,8 @@
             devHtml += `<tr><td>${i+1}</td><td>${val.toFixed(4)}</td><td>${dev.toFixed(4)}</td><td>${sq.toFixed(4)}</td></tr>`;
         });
         devHtml += `</tbody></table><p>Сумма квадратов отклонений: ${sumSq.toFixed(4)}</p>`;
-        document.getElementById('deviationsTableContent').innerHTML = devHtml;
+        document.getElementById(devContainerId).innerHTML = devHtml;
+
         // Z-оценки
         let zHtml = '<table class="stats-table"><thead><tr><th>№</th><th>Значение</th><th>Z-оценка (x-μ)/σ</th></tr></thead><tbody>';
         sample.forEach((val,i)=>{
@@ -642,11 +720,59 @@
             zHtml += `<tr><td>${i+1}</td><td>${val.toFixed(4)}</td><td>${z.toFixed(4)}</td></tr>`;
         });
         zHtml += `</tbody></table><p>Z-оценка позволяет привести данные к стандартной нормальной шкале.</p>`;
-        document.getElementById('zscoresContent').innerHTML = zHtml;
-        document.getElementById('extraStatsSection').classList.add('active');
+        document.getElementById(zContainerId).innerHTML = zHtml;
     }
 
-    // ======================== РАСЧЕТ КРИТЕРИЕВ ========================
+    // Отдельная функция для плашки описательной статистики
+    function computeDescriptiveStats() {
+        const inputText = document.getElementById('descInput').value;
+        const data = parseInput(inputText);
+        if(!data || data.length<2) {
+            alert('Введите хотя бы 2 числа через запятую');
+            return;
+        }
+        const mean = StatsMath.mean(data);
+        const variance = StatsMath.variance(data);
+        const std = StatsMath.std(data);
+        const skew = StatsMath.skewness(data);
+        const kurt = StatsMath.kurtosis(data);
+        const n = data.length;
+        
+        const statsGrid = document.getElementById('descStatsGrid');
+        statsGrid.innerHTML = `
+            <div class="stat-card"><div class="stat-label">Объем выборки</div><div class="stat-value">${n}</div></div>
+            <div class="stat-card"><div class="stat-label">Среднее</div><div class="stat-value">${mean.toFixed(4)}</div></div>
+            <div class="stat-card"><div class="stat-label">Дисперсия</div><div class="stat-value">${variance.toFixed(4)}</div></div>
+            <div class="stat-card"><div class="stat-label">Ср.-кв. отклонение</div><div class="stat-value">${std.toFixed(4)}</div></div>
+            <div class="stat-card"><div class="stat-label">Асимметрия</div><div class="stat-value">${skew.toFixed(4)}</div></div>
+            <div class="stat-card"><div class="stat-label">Эксцесс (изб.)</div><div class="stat-value">${kurt.toFixed(4)}</div></div>
+        `;
+        
+        // Таблица отклонений и квадратов
+        let devHtml = '<h3>Таблица отклонений и квадратов отклонений</h3><table class="stats-table"><thead><tr><th>№</th><th>Значение</th><th>Отклонение</th><th>Квадрат отклонения</th></tr></thead><tbody>';
+        let sumSq=0;
+        data.forEach((val,i)=>{
+            const dev = val-mean;
+            const sq = dev*dev;
+            sumSq += sq;
+            devHtml += `<tr><td>${i+1}</td><td>${val.toFixed(4)}</td><td>${dev.toFixed(4)}</td><td>${sq.toFixed(4)}</td></tr>`;
+        });
+        devHtml += `</tbody></table><p>Сумма квадратов отклонений: ${sumSq.toFixed(4)}</p>`;
+        document.getElementById('descDeviationsTable').innerHTML = devHtml;
+        
+        // Z-оценки
+        let zHtml = '<h3>Z-оценки (нормальная шкала)</h3><table class="stats-table"><thead><tr><th>№</th><th>Значение</th><th>Z-оценка</th></tr></thead><tbody>';
+        data.forEach((val,i)=>{
+            const z = (val-mean)/std;
+            zHtml += `<tr><td>${i+1}</td><td>${val.toFixed(4)}</td><td>${z.toFixed(4)}</td></tr>`;
+        });
+        zHtml += `</tbody></table>`;
+        document.getElementById('descZScoresTable').innerHTML = zHtml;
+        
+        document.getElementById('descriptiveResults').classList.add('active');
+    }
+
+    // ======================== РАСЧЕТ КРИТЕРИЕВ (как ранее) ========================
     function calculate() {
         const inputs = collectInputs();
         if(!inputs) return;
