@@ -306,6 +306,10 @@
             margin: 15px 0;
             display: none;
         }
+        .scrollable-table {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
         @media (max-width: 768px) {
             .methods-grid { grid-template-columns: 1fr; }
             .result-row { flex-direction: column; gap: 5px; }
@@ -498,7 +502,7 @@
         { id:'cochran', name:'Критерий Кочрена', description:'Сравнение дисперсий равных групп.', icon:'fas fa-th-large', minSamples:3, maxSamples:10 },
         { id:'bartlett', name:'Критерий Бартлета', description:'Равенство дисперсий нескольких выборок.', icon:'fas fa-equals', minSamples:2, maxSamples:10 },
         { id:'anova', name:'Однофакторный ANOVA', description:'Сравнение средних 3+ групп.', icon:'fas fa-chart-pie', minSamples:3, maxSamples:10 },
-        { id:'pearson', name:'Корреляция Пирсона', description:'Линейная связь.', icon:'fas fa-chart-area', minSamples:2, maxSamples:2 },
+        { id:'pearson', name:'Корреляция Пирсона', description:'Линейная связь с таблицей вычислений.', icon:'fas fa-chart-area', minSamples:2, maxSamples:2 },
         { id:'smirnov', name:'Критерий Смирнова', description:'Сравнение распределений.', icon:'fas fa-random', minSamples:2, maxSamples:2 }
     ];
 
@@ -710,7 +714,7 @@
             sumSq += sq;
             devHtml += `<tr><td>${i+1}</td><td>${val.toFixed(4)}</td><td>${dev.toFixed(4)}</td><td>${sq.toFixed(4)}</td></tr>`;
         });
-        devHtml += `</tbody></table><p>Сумма квадратов отклонений: ${sumSq.toFixed(4)}</p>`;
+        devHtml += `</tbody><tr><p>Сумма квадратов отклонений: ${sumSq.toFixed(4)}</p>`;
         document.getElementById(devContainerId).innerHTML = devHtml;
 
         // Z-оценки
@@ -764,7 +768,7 @@
         let zHtml = '<h3>Z-оценки (нормальная шкала)</h3><table class="stats-table"><thead><tr><th>№</th><th>Значение</th><th>Z-оценка</th></tr></thead><tbody>';
         data.forEach((val,i)=>{
             const z = (val-mean)/std;
-            zHtml += `<tr><td>${i+1}</td><td>${val.toFixed(4)}</td><td>${z.toFixed(4)}</td></tr>`;
+            zHtml += `<tr> zeuden${i+1}</td><td>${val.toFixed(4)}</td><td>${z.toFixed(4)}</td></tr>`;
         });
         zHtml += `</tbody></table>`;
         document.getElementById('descZScoresTable').innerHTML = zHtml;
@@ -772,7 +776,7 @@
         document.getElementById('descriptiveResults').classList.add('active');
     }
 
-    // ======================== РАСЧЕТ КРИТЕРИЕВ (как ранее) ========================
+    // ======================== РАСЧЕТ КРИТЕРИЕВ ========================
     function calculate() {
         const inputs = collectInputs();
         if(!inputs) return;
@@ -795,6 +799,71 @@
         updateExtraStats();
     }
 
+    // Пирсон с подробной таблицей
+    function calcPearson(inp, res) {
+        const [x, y] = inp;
+        if (x.length !== y.length) {
+            res.error = "Выборки должны иметь одинаковую длину";
+            return res;
+        }
+        const n = x.length;
+        const meanX = StatsMath.mean(x);
+        const meanY = StatsMath.mean(y);
+        
+        // Массив для хранения промежуточных вычислений
+        const tableRows = [];
+        let sumDx = 0, sumDy = 0, sumDx2 = 0, sumDy2 = 0, sumDxDy = 0;
+        
+        for (let i = 0; i < n; i++) {
+            const dx = x[i] - meanX;
+            const dy = y[i] - meanY;
+            const dx2 = dx * dx;
+            const dy2 = dy * dy;
+            const dxdy = dx * dy;
+            tableRows.push({
+                xi: x[i],
+                yi: y[i],
+                dx: dx,
+                dy: dy,
+                dx2: dx2,
+                dy2: dy2,
+                dxdy: dxdy
+            });
+            sumDx += dx;
+            sumDy += dy;
+            sumDx2 += dx2;
+            sumDy2 += dy2;
+            sumDxDy += dxdy;
+        }
+        
+        // Коэффициент корреляции
+        const r = sumDxDy / Math.sqrt(sumDx2 * sumDy2);
+        
+        // t-статистика
+        const t = r * Math.sqrt((n - 2) / (1 - r * r));
+        const df = n - 2;
+        const pValue = 2 * (1 - StatsMath.tCDF(Math.abs(t), df));
+        
+        // Сохраняем таблицу и суммы в результат
+        res.pearsonTable = tableRows;
+        res.pearsonSums = {
+            sumDx: sumDx,
+            sumDy: sumDy,
+            sumDx2: sumDx2,
+            sumDy2: sumDy2,
+            sumDxDy: sumDxDy
+        };
+        res.statistic = r.toFixed(4);
+        res.tValue = t.toFixed(4);
+        res.df = df;
+        res.pValue = pValue.toFixed(6);
+        res.conclusion = pValue < 0.05 ? "Корреляция значима (p < 0.05)" : "Корреляция незначима (p ≥ 0.05)";
+        res.meanX = meanX.toFixed(4);
+        res.meanY = meanY.toFixed(4);
+        return res;
+    }
+
+    // Остальные критерии (без изменений, кроме добавления в конце функций)
     function calcFisher(inp,res){
         const [s1,s2]=inp; const v1=StatsMath.variance(s1), v2=StatsMath.variance(s2);
         let F,df1,df2; if(v1>=v2){ F=v1/v2; df1=s1.length-1; df2=s2.length-1; } else { F=v2/v1; df1=s2.length-1; df2=s1.length-1; }
@@ -900,19 +969,6 @@
         res.conclusion = p<0.05?"Группы различаются":"Группы не различаются";
         return res;
     }
-    function calcPearson(inp,res){
-        const [x,y]=inp; if(x.length!==y.length){res.error="Разные длины"; return res;}
-        const n=x.length; const mx=StatsMath.mean(x), my=StatsMath.mean(y);
-        let cov=0, varX=0, varY=0;
-        for(let i=0;i<n;i++){ let dx=x[i]-mx, dy=y[i]-my; cov+=dx*dy; varX+=dx*dx; varY+=dy*dy; }
-        cov/=(n-1); varX/=(n-1); varY/=(n-1);
-        const r=cov/Math.sqrt(varX*varY);
-        const t=r*Math.sqrt((n-2)/(1-r*r)); const df=n-2;
-        const p=2*(1-StatsMath.tCDF(Math.abs(t),df));
-        res.statistic=r.toFixed(4); res.tValue=t.toFixed(4); res.pValue=p.toFixed(6);
-        res.conclusion = p<0.05?"Корреляция значима":"Корреляция незначима";
-        return res;
-    }
     function calcSmirnov(inp,res){
         const [s1,s2]=inp; const n1=s1.length, n2=s2.length;
         const allVals = [...new Set([...s1,...s2])].sort((a,b)=>a-b);
@@ -941,21 +997,82 @@
         return ranks;
     }
 
-    function displayResults(result){
+    function displayResults(result) {
         const container = document.getElementById('resultContent');
         container.innerHTML = '';
-        if(result.error){ container.innerHTML = `<div style="color:red;">Ошибка: ${result.error}</div>`; document.getElementById('resultSection').classList.add('active'); return; }
-        const addRow=(label,val)=>{ let d=document.createElement('div'); d.className='result-row'; d.innerHTML=`<div class="result-label">${label}:</div><div class="result-value">${val}</div>`; container.appendChild(d); };
-        addRow('Метод',result.method);
-        addRow('Время',result.timestamp);
-        for(let k in result){
-            if(!['method','timestamp','inputs','error'].includes(k)){
+        if (result.error) {
+            container.innerHTML = `<div style="color:red;">Ошибка: ${result.error}</div>`;
+            document.getElementById('resultSection').classList.add('active');
+            return;
+        }
+        const addRow = (label, val) => {
+            const d = document.createElement('div');
+            d.className = 'result-row';
+            d.innerHTML = `<div class="result-label">${label}:</div><div class="result-value">${val}</div>`;
+            container.appendChild(d);
+        };
+        addRow('Метод', result.method);
+        addRow('Время', result.timestamp);
+        for (let k in result) {
+            if (!['method', 'timestamp', 'inputs', 'error', 'pearsonTable', 'pearsonSums', 'meanX', 'meanY'].includes(k)) {
                 let label = k;
-                if(k==='statistic') label='Статистика';
-                if(k==='pValue') label='p-значение';
-                if(k==='conclusion') label='Вывод';
+                if (k === 'statistic') label = 'Статистика';
+                if (k === 'pValue') label = 'p-значение';
+                if (k === 'conclusion') label = 'Вывод';
                 addRow(label, result[k]);
             }
+        }
+        // Если есть таблица Пирсона
+        if (result.pearsonTable && result.pearsonSums) {
+            const meanX = result.meanX;
+            const meanY = result.meanY;
+            const sums = result.pearsonSums;
+            let tableHtml = `
+                <div style="margin-top: 30px;">
+                    <h3>Промежуточные вычисления для корреляции Пирсона</h3>
+                    <p>Среднее X̄ = ${meanX}, Среднее Ȳ = ${meanY}</p>
+                    <div class="scrollable-table">
+                    <table class="stats-table">
+                        <thead>
+                            <tr>
+                                <th>№</th><th>X<sub>i</sub></th><th>Y<sub>i</sub></th>
+                                <th>X<sub>i</sub> - X̄</th><th>Y<sub>i</sub> - Ȳ</th>
+                                <th>(X<sub>i</sub> - X̄)²</th><th>(Y<sub>i</sub> - Ȳ)²</th>
+                                <th>(X<sub>i</sub> - X̄)(Y<sub>i</sub> - Ȳ)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            result.pearsonTable.forEach((row, idx) => {
+                tableHtml += `<tr>
+                    <td>${idx+1}</td>
+                    <td>${row.xi.toFixed(4)}</td>
+                    <td>${row.yi.toFixed(4)}</td>
+                    <td>${row.dx.toFixed(4)}</td>
+                    <td>${row.dy.toFixed(4)}</td>
+                    <td>${row.dx2.toFixed(4)}</td>
+                    <td>${row.dy2.toFixed(4)}</td>
+                    <td>${row.dxdy.toFixed(4)}</td>
+                </tr>`;
+            });
+            tableHtml += `
+                        </tbody>
+                        <tfoot style="background: #e9ecef; font-weight: bold;">
+                            <tr>
+                                <td colspan="3"><strong>СУММА</strong></td>
+                                <td>${sums.sumDx.toFixed(4)}</td>
+                                <td>${sums.sumDy.toFixed(4)}</td>
+                                <td>${sums.sumDx2.toFixed(4)}</td>
+                                <td>${sums.sumDy2.toFixed(4)}</td>
+                                <td>${sums.sumDxDy.toFixed(4)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    </div>
+                    <p><strong>Примечание:</strong> Суммы отклонений (столбцы 4 и 5) должны быть близки к нулю (погрешность округления).</p>
+                </div>
+            `;
+            container.innerHTML += tableHtml;
         }
         document.getElementById('resultSection').classList.add('active');
     }
